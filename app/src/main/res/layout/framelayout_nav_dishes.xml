@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ui.main.dishes.FragmentDishes">
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/dishes_tablayout"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@color/colorPrimary" />
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/dishes_tablelayout_pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="56dp"/>
+</FrameLayout>

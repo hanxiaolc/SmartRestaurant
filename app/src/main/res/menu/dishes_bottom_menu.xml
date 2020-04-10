@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/bottom_dishes"
+        android:icon="@drawable/ic_local_dining_black_24dp"
+        android:title="@string/dishes_tablayout_dishes" />
+    <item
+        android:id="@+id/bottom_drink"
+        android:icon="@drawable/ic_local_cafe_black_24dp"
+        android:title="@string/dishes_tablayout_drink" />
+    <item
+        android:id="@+id/bottom_mainfood"
+        android:icon="@drawable/ic_local_pizza_black_24dp"
+        android:title="@string/dishes_tablayout_mainfood" />
+    <item
+        android:id="@+id/bottom_dessert"
+        android:icon="@drawable/ic_cake_black_24dp"
+        android:title="@string/dishes_tablayout_dessert" />
+</menu>
