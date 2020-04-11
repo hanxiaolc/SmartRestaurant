@@ -22,5 +22,20 @@
         <action
             android:id="@+id/action_fragment_dishes_to_fragment_tables"
             app:destination="@id/fragment_tables" />
+        <action
+            android:id="@+id/action_fragment_dishes_to_fragment_commit"
+            app:destination="@id/fragment_commit" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragment_commit"
+        android:name="com.shawn.smartrestaurant.ui.main.commit.FragmentCommit"
+        android:label="fragment_commit"
+        tools:layout="@layout/fragment_commit" >
+        <action
+            android:id="@+id/action_fragment_commit_to_fragment_tables"
+            app:destination="@id/fragment_tables" />
+        <action
+            android:id="@+id/action_fragment_commit_to_fragment_dishes"
+            app:destination="@id/fragment_dishes" />
     </fragment>
 </navigation>

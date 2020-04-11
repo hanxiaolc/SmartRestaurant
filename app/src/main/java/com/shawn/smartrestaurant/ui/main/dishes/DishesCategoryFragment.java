@@ -2,6 +2,8 @@ package com.shawn.smartrestaurant.ui.main.dishes;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -21,9 +23,15 @@ public class DishesCategoryFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-
+//        setHasOptionsMenu(true);
         return inflater.inflate(R.layout.framelayout_tab_category, container, false);
     }
+
+//    @Override
+//    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+//        super.onCreateOptionsMenu(menu, inflater);
+//        inflater.inflate(R.menu.menu_toolbar_dishes_commit,menu);
+//    }
 
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
