@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1066335939237",
+    "firebase_url": "https://shawn-order.firebaseio.com",
+    "project_id": "shawn-order",
+    "storage_bucket": "shawn-order.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1066335939237:android:e79fd4536373aefdc67b4c",
+        "android_client_info": {
+          "package_name": "com.shawn.smartrestaurant"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1066335939237-31sgotkgofgi5qd2otvsh5c5f5gc2tku.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCBLTozh-fhTlc561kHHQMC1roq0IlFs7M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1066335939237-31sgotkgofgi5qd2otvsh5c5f5gc2tku.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
