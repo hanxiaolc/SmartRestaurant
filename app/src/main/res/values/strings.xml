@@ -15,5 +15,10 @@
     <string name="is_manager">I am a manager</string>
     <string name="company_code">Restaurant Code</string>
     <string name="hint_company_code">plateful_1st</string>
-    <string name="button_register">　SIGN UP</string>
+    <string name="button_register">SIGN UP</string>
+    <string name="button_login">LOGIN</string>
+    <string name="textView_login_head">WELCOME COMING!</string>
+    <string name="textView_login_introduce">It is a convenient app can be used to deal with basic order tasks in restaurants.</string>
+    <string name="textView_new_here">New here?</string>
+    <string name="textView_register">Register!</string>
 </resources>

@@ -20,10 +20,7 @@ public class SignUpActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sign_up);
 
         Toolbar toolbar = findViewById(R.id.toolbar_sign_up);
-        toolbar.setLogo(R.drawable.ic_noun_waiter_1948515);
-//        toolbar.setNavigationIcon(R.drawable.ic_noun_waiter_1948515);
+//        toolbar.setLogo(R.drawable.ic_noun_waiter_1948515);
         setSupportActionBar(toolbar);
-//        getActionBar().setIcon(R.drawable.ic_noun_waiter_1948515);
-//        openOptionsMenu();
     }
 }
