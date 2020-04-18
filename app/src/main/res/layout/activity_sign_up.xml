@@ -3,16 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginLeft="16dp"
+    android:layout_marginRight="16dp"
     android:orientation="vertical"
     tools:context=".ui.signup.SignUpActivity">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar_sign_up"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
-        android:minHeight="?attr/actionBarSize"
-        android:theme="?attr/actionBarTheme" />
+        android:layout_height="wrap_content" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -39,9 +38,9 @@
         android:id="@+id/editText_sign_up_user_id"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:autofillHints=""
         android:hint="@string/hint_user_id"
         android:imeActionLabel="@string/button_back"
+        android:importantForAutofill="no"
         android:inputType="textPersonName" />
 
     <TextView
@@ -59,19 +58,34 @@
         android:inputType="textPassword" />
 
     <TextView
-        android:id="@+id/textView_sign_up_manager"
+        android:id="@+id/textView_sign_up_company"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:labelFor="@id/editText_sign_up_company_code"
+        android:labelFor="@id/editText_sign_up_company"
         android:text="@string/company_code" />
 
     <EditText
-        android:id="@+id/editText_sign_up_company_code"
+        android:id="@+id/editText_sign_up_company"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:autofillHints=""
         android:hint="@string/hint_company_code"
-        android:inputType="textPersonName" />
+        android:importantForAutofill="no"
+        android:inputType="textEmailAddress" />
+
+    <TextView
+        android:id="@+id/textView_sign_up_email"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:labelFor="@id/editText_sign_up_email"
+        android:text="@string/sign_up_email" />
+
+    <EditText
+        android:id="@+id/editText_sign_up_email"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/hint_sign_up_email"
+        android:importantForAutofill="no"
+        android:inputType="textEmailAddress" />
 
     <Switch
         android:id="@+id/switch_sign_up_manager"
@@ -84,6 +98,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:gravity="center_horizontal"
         android:orientation="horizontal">
 
