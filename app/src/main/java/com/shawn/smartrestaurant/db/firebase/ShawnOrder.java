@@ -1,4 +1,4 @@
-package com.shawn.smartrestaurant.models.firebase;
+package com.shawn.smartrestaurant.db.firebase;
 
 public class ShawnOrder {
 

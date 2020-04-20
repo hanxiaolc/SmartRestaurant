@@ -14,8 +14,8 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.shawn.smartrestaurant.R;
-import com.shawn.smartrestaurant.models.User;
-import com.shawn.smartrestaurant.models.firebase.ShawnOrder;
+import com.shawn.smartrestaurant.db.entity.User;
+import com.shawn.smartrestaurant.db.firebase.ShawnOrder;
 import com.shawn.smartrestaurant.ui.login.LoginActivity;
 
 import java.util.HashMap;

@@ -2,21 +2,16 @@ package com.shawn.smartrestaurant.ui.main;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import com.shawn.smartrestaurant.R;
 import com.shawn.smartrestaurant.db.AppDatabase;
-import com.shawn.smartrestaurant.models.User;
+import com.shawn.smartrestaurant.db.entity.User;
 import com.shawn.smartrestaurant.ui.login.LoginActivity;
 
 import java.util.List;

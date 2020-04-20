@@ -8,14 +8,12 @@ import android.widget.EditText;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.room.Room;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.shawn.smartrestaurant.R;
 import com.shawn.smartrestaurant.db.AppDatabase;
-import com.shawn.smartrestaurant.models.User;
-import com.shawn.smartrestaurant.models.firebase.ShawnOrder;
-import com.shawn.smartrestaurant.models.local.LocalDb;
+import com.shawn.smartrestaurant.db.entity.User;
+import com.shawn.smartrestaurant.db.firebase.ShawnOrder;
 import com.shawn.smartrestaurant.ui.main.MainActivity;
 import com.shawn.smartrestaurant.ui.signup.SignUpActivity;
 
