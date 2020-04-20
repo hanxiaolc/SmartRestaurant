@@ -7,11 +7,11 @@
     <string name="dishes_tablayout_dessert">Dessert</string>
     <string name="button_back">BACK</string>
     <string name="user_id">User ID</string>
-    <string name="hint_user_id">smartTom_1993</string>
+    <string name="hint_user_id">Shawn1993</string>
     <string name="password">Password</string>
     <string name="is_manager">I am a manager</string>
-    <string name="company_code">Restaurant Code</string>
-    <string name="hint_company_code">plateful_1st</string>
+    <string name="company_code">Group Code</string>
+    <string name="hint_company_code">0000</string>
     <string name="sign_up_email">Email</string>
     <string name="hint_sign_up_email">plateful@gmail.com</string>
     <string name="button_register">SIGN UP</string>
