@@ -21,4 +21,22 @@
     <string name="textView_new_here">New here?</string>
     <string name="textView_register">Register!</string>
     <string name="as_manager">Login as a manager</string>
+    <string name="drawer_home">HOME</string>
+    <string name="drawer_menu">MENU</string>
+    <string name="drawer_profile">PROFILE</string>
+    <string name="drawer_setting">SETTING</string>
+    <string name="drawer_profile_image">PROFILE IMAGE</string>
+    <string name="drawer_other">OTHER</string>
+    <string name="action_add">ADD</string>
+    <string name="drawer_header_website">shawn.com</string>
+    <string name="nav_app_bar_open_drawer_description">Open navigation drawer</string>
+    <string name="nav_app_bar_close_drawer_description">Close navigation drawer</string>
+    <string name="add_menu_image_description">Dish picture</string>
+    <string name="add_menu_action_album_description">Get a photo from album</string>
+    <string name="add_menu_action_camera_description">Take a photo</string>
+    <string name="edit_text_dish_name">DISH NAME</string>
+    <string name="auto_complete_text_category">CATEGORY</string>
+    <string name="helper_text_required">required</string>
+    <string name="edit_text_add_menu_price">PRICE</string>
+    <string name="button_add_to_menu">ADD TO MENU</string>
 </resources>

@@ -3,9 +3,14 @@ package com.shawn.smartrestaurant.ui.main.dishes;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -19,6 +24,9 @@ import android.view.ViewGroup;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.shawn.smartrestaurant.R;
+import com.shawn.smartrestaurant.ui.main.MainActivity;
+
+import java.util.Objects;
 
 
 /**
@@ -68,6 +76,20 @@ public class FragmentDishes extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+        ((MainActivity) getActivity()).getActionBarDrawerToggle().setHomeAsUpIndicator(R.drawable.ic_arrow_back_black_24dp);
+        ((MainActivity) getActivity()).getActionBarDrawerToggle().setDrawerIndicatorEnabled(false);
+        ((MainActivity) getActivity()).setCurrentFragment(this);
+//        Objects.requireNonNull(((MainActivity) getActivity()).getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
+//        ActionBarDrawerToggle.Delegate delegate = ((MainActivity) getActivity()).getDrawerToggleDelegate();
+//        Objects.requireNonNull(delegate).setActionBarUpIndicator(getResources().getDrawable(R.drawable.ic_arrow_back_black_24dp, null), R.string.nav_app_bar_navigate_up_description);
+
+//        ActionBar actionbar = ((MainActivity) getActivity()).getSupportActionBar();
+//        NavController navController = ((NavHostFragment) this.getParentFragment()).getNavController();
+//        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph())
+//                .setDrawerLayout(((MainActivity) getActivity()).getDrawerLayout())
+//                .build();
+//        NavigationUI.setupActionBarWithNavController((MainActivity) getActivity(), navController,appBarConfiguration);
     }
 
     @Override
@@ -109,7 +131,7 @@ public class FragmentDishes extends Fragment {
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.menu_toolbar_dishes_commit, menu);
+        inflater.inflate(R.menu.option_menu_dishes_commit, menu);
     }
 
     @Override

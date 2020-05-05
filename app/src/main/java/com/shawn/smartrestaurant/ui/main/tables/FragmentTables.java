@@ -1,8 +1,17 @@
 package com.shawn.smartrestaurant.ui.main.tables;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
+import androidx.navigation.ui.AppBarConfiguration;
+import androidx.navigation.ui.NavigationUI;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -11,6 +20,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.shawn.smartrestaurant.R;
+import com.shawn.smartrestaurant.ui.main.MainActivity;
+
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -19,6 +33,9 @@ import com.shawn.smartrestaurant.R;
  * create an instance of this fragment.
  */
 public class FragmentTables extends Fragment {
+
+    //
+    private MainActivity activity;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -51,12 +68,22 @@ public class FragmentTables extends Fragment {
         return fragment;
     }
 
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (null == activity) {
+            activity = (MainActivity) getActivity();
+        }
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
+        }
+
+        // initial current fragment in activity
+        List<Fragment> fragments = Objects.requireNonNull((MainActivity) getActivity()).getSupportFragmentManager().getFragments().get(0).getChildFragmentManager().getFragments();
+        if (null == ((MainActivity) getActivity()).getCurrentFragment() && 1 == fragments.size() && fragments.get(0) instanceof FragmentTables) {
+            ((MainActivity) getActivity()).setCurrentFragment(fragments.get(0));
         }
     }
 

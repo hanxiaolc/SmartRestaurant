@@ -8,8 +8,8 @@
     <fragment
         android:id="@+id/fragment_tables"
         android:name="com.shawn.smartrestaurant.ui.main.tables.FragmentTables"
-        android:label="fragment_tables"
-        tools:layout="@layout/framelayout_nav_tables" >
+        android:label="TABLES"
+        tools:layout="@layout/framelayout_nav_tables">
         <action
             android:id="@+id/action_fragment_tables_to_fragment_dishes"
             app:destination="@id/fragment_dishes" />
@@ -17,8 +17,8 @@
     <fragment
         android:id="@+id/fragment_dishes"
         android:name="com.shawn.smartrestaurant.ui.main.dishes.FragmentDishes"
-        android:label="fragment_dishes"
-        tools:layout="@layout/framelayout_nav_dishes" >
+        android:label="DISHES"
+        tools:layout="@layout/framelayout_nav_dishes">
         <action
             android:id="@+id/action_fragment_dishes_to_fragment_tables"
             app:destination="@id/fragment_tables" />
@@ -30,7 +30,7 @@
         android:id="@+id/fragment_commit"
         android:name="com.shawn.smartrestaurant.ui.main.commit.FragmentCommit"
         android:label="fragment_commit"
-        tools:layout="@layout/fragment_commit" >
+        tools:layout="@layout/fragment_commit">
         <action
             android:id="@+id/action_fragment_commit_to_fragment_tables"
             app:destination="@id/fragment_tables" />
@@ -38,4 +38,14 @@
             android:id="@+id/action_fragment_commit_to_fragment_dishes"
             app:destination="@id/fragment_dishes" />
     </fragment>
+    <!--    <fragment-->
+    <!--        android:id="@+id/fragment_drawer_profile"-->
+    <!--        android:name="com.shawn.smartrestaurant.ui.main.FragmentProfile"-->
+    <!--        android:label="@string/drawer_profile"-->
+    <!--        tools:layout="@layout/fragment_drawer_profile" />-->
+    <!--    <fragment-->
+    <!--        android:id="@+id/fragment_drawer_setting"-->
+    <!--        android:name="com.shawn.smartrestaurant.ui.main.FragmentSetting"-->
+    <!--        android:label="@string/drawer_setting"-->
+    <!--        tools:layout="@layout/fragment_drawer_setting" />-->
 </navigation>

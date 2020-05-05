@@ -2,55 +2,299 @@ package com.shawn.smartrestaurant.ui.main;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
+import android.widget.AutoCompleteTextView;
+import android.widget.TextView;
 
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.NavigationUI;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
 
+import com.google.android.material.navigation.NavigationView;
 import com.shawn.smartrestaurant.R;
 import com.shawn.smartrestaurant.db.AppDatabase;
 import com.shawn.smartrestaurant.db.entity.User;
 import com.shawn.smartrestaurant.ui.login.LoginActivity;
+import com.shawn.smartrestaurant.ui.main.addmenu.FragmentAddMenu;
+import com.shawn.smartrestaurant.ui.main.commit.FragmentCommit;
+import com.shawn.smartrestaurant.ui.main.dishes.FragmentDishes;
 
 import java.util.List;
+import java.util.Objects;
 
+/**
+ *
+ */
 public class MainActivity extends AppCompatActivity {
 
+    //
+    private AppDatabase localDb;
+
+    //
+    private User user;
+
+    //
+    private NavHostFragment tablesNavHostFragment;
+
+    //
+    private NavHostFragment menuNavHostFragment;
+
+    //
+    private MenuItem currentMenuItem;
+
+    //
+    private Fragment currentFragment;
+
+    //
+    private DrawerLayout drawerLayout;
+
+    //
+    private NavigationView drawerNavigationView;
+
+    //
+    private ActionBarDrawerToggle actionBarDrawerToggle;
+
+    //
+    private Toolbar toolbar;
+
+    //
+    private AutoCompleteTextView autoCompleteTextView;
+
+
+    /**
+     *
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        AppDatabase localDb = AppDatabase.getInstance(getApplicationContext());
-        List<User> users = localDb.userDao().findAll();
+        //
+//        this.autoCompleteTextView = findViewById(R.id.autoCompleteTextView_menu_category);
+
+        // Set toolbar as action bar
+        this.toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(this.toolbar);
+
+        // Set drawer layout with toolbar
+        this.drawerLayout = findViewById(R.id.activity_main);
+
+        //
+        this.actionBarDrawerToggle = createActionBarDrawerToggle();
+
+        //
+        this.drawerLayout.addDrawerListener(this.actionBarDrawerToggle);
+
+        // Set drawer navigation view
+        this.drawerNavigationView = findViewById(R.id.nav_view);
+        setUpDrawerMenu(this.drawerNavigationView);
+
+        if (null == this.currentMenuItem) {
+            this.currentMenuItem = this.drawerNavigationView.getMenu().getItem(0);
+            this.currentMenuItem.setChecked(true);
+        }
+
+        TextView drawerHeadUserId = this.drawerNavigationView.getHeaderView(0).findViewById(R.id.drawer_head_name);
+        this.tablesNavHostFragment = NavHostFragment.create(R.navigation.nav_graph);
+        this.menuNavHostFragment = NavHostFragment.create(R.navigation.nav_graph_menu_setting);
+
+        this.localDb = AppDatabase.getInstance(getApplicationContext());
+        List<User> users = this.localDb.userDao().findAll();
         if (null == users || 0 == users.size()) {
             Intent intent = new Intent(MainActivity.this, LoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
+        } else {
+            this.user = Objects.requireNonNull(users).get(0);
         }
 
-        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-//        AppBarConfiguration appBarConfiguration =
-//                new AppBarConfiguration.Builder(navController.getGraph()).build();
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        NavigationUI.setupWithNavController(toolbar, navController);
+        //
+        drawerHeadUserId.setText(this.user.getId());
+
+        //
+        if (0 == getSupportFragmentManager().getFragments().size()) {
+            getSupportFragmentManager().beginTransaction().add(R.id.fragmentLayout_main, this.tablesNavHostFragment).commit();
+        }
     }
 
+    /**
+     *
+     */
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        this.actionBarDrawerToggle.syncState();
+    }
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        MenuInflater inflater = getMenuInflater();
-//        inflater.inflate(R.menu.menu_toolbar_dishes_commit, menu);
-//        return true;
+    /**
+     *
+     */
+    public void setUpDrawerMenu(NavigationView navigationView) {
+        navigationView.setNavigationItemSelectedListener(item -> {
+                    if (this.currentMenuItem.getItemId() == item.getItemId()) {
+                        this.drawerLayout.closeDrawers();
+                        return true;
+                    }
+                    this.currentMenuItem = item;
+                    item.setChecked(true);
+                    switch (item.getItemId()) {
+                        case R.id.fragment_drawer_tables:
+//                            NavigationUI.setupWithNavController(toolbar, navController);
+                            getSupportFragmentManager().beginTransaction().replace(R.id.fragmentLayout_main, this.tablesNavHostFragment).commit();
+//                            getSupportFragmentManager().beginTransaction().add(R.id.fragmentLayout_main, FragmentTables.class, new Bundle()).commit();
+//                            replaceFragment(new FragmentTables());
+////                            currentFragmentTitle = "PROFILE";
+                            break;
+                        case R.id.fragment_drawer_menu:
+                            getSupportFragmentManager().beginTransaction().replace(R.id.fragmentLayout_main, this.menuNavHostFragment).commit();
+                            break;
+                        case R.id.fragment_drawer_profile:
+                            getSupportFragmentManager().beginTransaction().replace(R.id.fragmentLayout_main, FragmentProfile.class, new Bundle()).addToBackStack("FragmentTables").commit();
+                            //replaceFragment(new FragmentProfile());
+////                            currentFragmentTitle = "PROFILE";
+                            break;
+//                        case R.id.fragment_drawer_setting:
+////                            drawerMenuIndex = 1;
+////                            currentFragmentTitle = "SETTING";
+//                            break;
+                        default:
+////                            drawerMenuIndex = 0;
+                    }
+                    this.drawerLayout.closeDrawers();
+                    return true;
+                }
+        );
+    }
+
+    /**
+     *
+     */
+//    public void replaceFragment(Fragment newFragment) {
+////        Bundle args = new Bundle();
+////        newFragment.setArguments(args);
+//
+//        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+////        transaction.add(newFragment,"TAG");
+//        // Replace whatever is in the fragment_container view with this fragment,
+//        // and add the transaction to the back stack so the user can navigate back
+//        transaction.replace(R.id.fragmentLayout_main, newFragment);
+//        transaction.addToBackStack(null);
+//
+//        // Commit the transaction
+//        transaction.commit();
+//        currentFragment = newFragment;
 //    }
 
-//    @Override
-//    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-//        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
-//        return NavigationUI.onNavDestinationSelected(item, navController)
-//                || super.onOptionsItemSelected(item);
-//    }
+    /**
+     *
+     */
+    public ActionBarDrawerToggle createActionBarDrawerToggle() {
+        this.actionBarDrawerToggle = new ActionBarDrawerToggle(this, this.drawerLayout, this.toolbar, R.string.nav_app_bar_open_drawer_description, R.string.nav_app_bar_close_drawer_description);
+
+        this.actionBarDrawerToggle.setToolbarNavigationClickListener(v -> {
+            if (this.currentFragment instanceof FragmentDishes) {
+                this.tablesNavHostFragment.getNavController().navigate(R.id.action_fragment_dishes_to_fragment_tables, new Bundle());
+                this.actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
+            }
+
+            if (this.currentFragment instanceof FragmentCommit) {
+                this.tablesNavHostFragment.getNavController().navigate(R.id.action_fragment_commit_to_fragment_dishes, new Bundle());
+            }
+
+            if (this.currentFragment instanceof FragmentAddMenu) {
+                this.menuNavHostFragment.getNavController().navigate(R.id.action_fragment_nav_addmenu_to_fragment_nav_menu, new Bundle());
+                this.actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
+            }
+        });
+
+        return this.actionBarDrawerToggle;
+    }
+
+    /**
+     *
+     */
+    public Fragment getCurrentFragment() {
+        return this.currentFragment;
+    }
+
+    /**
+     *
+     */
+    public void setCurrentFragment(Fragment currentFragment) {
+        this.currentFragment = currentFragment;
+    }
+
+    /**
+     *
+     */
+    public MenuItem getCurrentMenuItem() {
+        return this.currentMenuItem;
+    }
+
+    /**
+     *
+     */
+    public void setCurrentMenuItem(MenuItem currentMenuItem) {
+        this.currentMenuItem = currentMenuItem;
+    }
+
+    /**
+     *
+     */
+    public DrawerLayout getDrawerLayout() {
+        return this.drawerLayout;
+    }
+
+    /**
+     *
+     */
+    public void setDrawerLayout(DrawerLayout drawerLayout) {
+        this.drawerLayout = drawerLayout;
+    }
+
+    /**
+     *
+     */
+    public ActionBarDrawerToggle getActionBarDrawerToggle() {
+        return this.actionBarDrawerToggle;
+    }
+
+    /**
+     *
+     */
+    public void setActionBarDrawerToggle(ActionBarDrawerToggle actionBarDrawerToggle) {
+        this.actionBarDrawerToggle = actionBarDrawerToggle;
+    }
+
+    /**
+     *
+     */
+    public NavHostFragment getTablesNavHostFragment() {
+        return this.tablesNavHostFragment;
+    }
+
+    /**
+     *
+     */
+    public void setTablesNavHostFragment(NavHostFragment tablesNavHostFragment) {
+        this.tablesNavHostFragment = tablesNavHostFragment;
+    }
+
+    /**
+     *
+     */
+    public AutoCompleteTextView getAutoCompleteTextView() {
+        return this.autoCompleteTextView;
+    }
+
+    /**
+     *
+     */
+    public void setAutoCompleteTextView(AutoCompleteTextView autoCompleteTextView) {
+        this.autoCompleteTextView = autoCompleteTextView;
+    }
 }

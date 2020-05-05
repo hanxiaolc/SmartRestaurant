@@ -1,11 +1,17 @@
-package com.shawn.smartrestaurant.ui.main.commit;
+package com.shawn.smartrestaurant.ui.main.menu;
 
 import android.os.Bundle;
+
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
+
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
-import androidx.fragment.app.Fragment;
 
 import com.shawn.smartrestaurant.R;
 import com.shawn.smartrestaurant.ui.main.MainActivity;
@@ -13,10 +19,10 @@ import com.shawn.smartrestaurant.ui.main.MainActivity;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link FragmentCommit#newInstance} factory method to
+ * Use the {@link FragmentMenu#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FragmentCommit extends Fragment {
+public class FragmentMenu extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -26,7 +32,7 @@ public class FragmentCommit extends Fragment {
     private String mParam1;
     private String mParam2;
 
-    public FragmentCommit() {
+    public FragmentMenu() {
         // Required empty public constructor
     }
 
@@ -36,11 +42,11 @@ public class FragmentCommit extends Fragment {
      *
      * @param param1 Parameter 1.
      * @param param2 Parameter 2.
-     * @return A new instance of fragment fragment_commit.
+     * @return A new instance of fragment FragmentMenus.
      */
     // TODO: Rename and change types and number of parameters
-    public static FragmentCommit newInstance(String param1, String param2) {
-        FragmentCommit fragment = new FragmentCommit();
+    public static FragmentMenu newInstance(String param1, String param2) {
+        FragmentMenu fragment = new FragmentMenu();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, param1);
         args.putString(ARG_PARAM2, param2);
@@ -54,15 +60,35 @@ public class FragmentCommit extends Fragment {
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
-
-            ((MainActivity) getActivity()).setCurrentFragment(this);
         }
+
+        // Remember to set has option menu true
+        setHasOptionsMenu(true);
+        ((MainActivity) getActivity()).setCurrentFragment(this);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_commit, container, false);
+        return inflater.inflate(R.layout.fragment_nav_menu, container, false);
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.option_menu_add_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_add_menu) {
+            NavHostFragment.findNavController(this).navigate(R.id.action_fragment_nav_menu_to_fragment_nav_addmenu, new Bundle());
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

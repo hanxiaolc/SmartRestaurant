@@ -30,7 +30,7 @@ public class DishesCategoryFragment extends Fragment {
 //    @Override
 //    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
 //        super.onCreateOptionsMenu(menu, inflater);
-//        inflater.inflate(R.menu.menu_toolbar_dishes_commit,menu);
+//        inflater.inflate(R.menu.option_menu_dishes_commit,menu);
 //    }
 
     @Override
