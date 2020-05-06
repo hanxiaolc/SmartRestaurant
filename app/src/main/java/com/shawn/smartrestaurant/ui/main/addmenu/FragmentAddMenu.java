@@ -1,30 +1,33 @@
 package com.shawn.smartrestaurant.ui.main.addmenu;
 
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
-import android.text.Editable;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.textfield.TextInputEditText;
 import com.shawn.smartrestaurant.R;
-import com.shawn.smartrestaurant.ui.login.LoginActivity;
 import com.shawn.smartrestaurant.ui.main.MainActivity;
 
+import java.io.File;
 import java.util.Objects;
+
+import static androidx.core.content.FileProvider.getUriForFile;
 
 
 /**
@@ -35,7 +38,25 @@ import java.util.Objects;
 public class FragmentAddMenu extends Fragment {
 
     //
+    public static final int REQUEST_CODE_IMAGE_REQUEST = 101;
+
+    //
+    public static final int REQUEST_CODE_IMAGE_CAPTURE = 102;
+
+    //
+    public static final int RESULT_CODE_SUCCEEDED = -1;
+
+    //
+    public static final int RESULT_CODE_FAILED = 0;
+
+    //
     private ArrayAdapter<String> adapter;
+
+    //
+    private ImageView dishImage;
+
+    //
+    private Uri tempImageUri;
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -99,7 +120,7 @@ public class FragmentAddMenu extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         // Get the elements of fragment
-        ImageView dishImage = view.findViewById(R.id.imageView_dish_image);
+        dishImage = view.findViewById(R.id.imageView_dish_image);
         TextInputEditText dishName = view.findViewById(R.id.editText_add_menu_dish_name);
         AutoCompleteTextView category = view.findViewById(R.id.autoCompleteTextView_add_menu_category);
         TextInputEditText price = view.findViewById(R.id.editText_add_menu_price);
@@ -118,27 +139,53 @@ public class FragmentAddMenu extends Fragment {
         category.setAdapter(this.adapter);
 
         // Set button behavior
-        addToMenu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (Objects.requireNonNull(dishName.getText()).toString().isEmpty() || category.getText().toString().isEmpty() || Objects.requireNonNull(price.getText()).toString().isEmpty()) {
-                    alertDisplay("Failed", "Dish Name, Category and Price should not be empty.", (dialog, which) -> {
-                    });
-                    return;
-                }
+        addToMenu.setOnClickListener(v -> {
+            if (Objects.requireNonNull(dishName.getText()).toString().isEmpty() || category.getText().toString().isEmpty() || Objects.requireNonNull(price.getText()).toString().isEmpty()) {
+                alertDisplay("Failed", "Dish Name, Category and Price should not be empty.", (dialog, which) -> {
+                });
             }
         });
 
         fetchFromAbulm.setOnClickListener(v -> {
-            String s = null;
-            String s1 = null;
+            super.startActivityForResult(new Intent(
+                    Intent.ACTION_GET_CONTENT).setType("image/*"), REQUEST_CODE_IMAGE_REQUEST);
         });
 
         takePhoto.setOnClickListener(v -> {
-            String s = null;
-            String s1 = null;
-        });
+            File tempImagePath = requireContext().getFilesDir();
+            if (null != Objects.requireNonNull(tempImagePath).listFiles()) {
+                for (File f : Objects.requireNonNull(tempImagePath.listFiles())) {
+                    if (f.getName().contains("jpg")) {
+                        f.delete();
+                    }
+                }
+            }
 
+            File tempImage = new File(tempImagePath, System.currentTimeMillis() + ".jpg");
+            tempImageUri = getUriForFile(requireActivity(), "com.shawn.smartrestaurant.fileprovider", tempImage);
+
+            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE).putExtra(MediaStore.EXTRA_OUTPUT, tempImageUri);
+            super.startActivityForResult(cameraIntent, REQUEST_CODE_IMAGE_CAPTURE);
+        });
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode != RESULT_CODE_FAILED) {
+            switch (requestCode) {
+                case REQUEST_CODE_IMAGE_REQUEST:
+                    Glide.with(this).load(data.getData()).centerCrop().into(dishImage);
+                    break;
+                case REQUEST_CODE_IMAGE_CAPTURE:
+                    Glide.with(this).load(tempImageUri).centerCrop().into(dishImage);
+                    break;
+            }
+        }
     }
 
     /**

@@ -108,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this, LoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
+            return;
         } else {
             this.user = Objects.requireNonNull(users).get(0);
         }
@@ -296,5 +297,33 @@ public class MainActivity extends AppCompatActivity {
      */
     public void setAutoCompleteTextView(AutoCompleteTextView autoCompleteTextView) {
         this.autoCompleteTextView = autoCompleteTextView;
+    }
+
+    /**
+     *
+     */
+    public AppDatabase getLocalDb() {
+        return localDb;
+    }
+
+    /**
+     *
+     */
+    public void setLocalDb(AppDatabase localDb) {
+        this.localDb = localDb;
+    }
+
+    /**
+     *
+     */
+    public User getUser() {
+        return user;
+    }
+
+    /**
+     *
+     */
+    public void setUser(User user) {
+        this.user = user;
     }
 }

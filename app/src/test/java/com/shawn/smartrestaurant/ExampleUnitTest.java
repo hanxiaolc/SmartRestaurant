@@ -1,12 +1,15 @@
 package com.shawn.smartrestaurant;
 
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.shawn.smartrestaurant.db.AppDatabase;
+import com.shawn.smartrestaurant.db.entity.User;
 
 import junit.framework.TestResult;
 
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,4 +42,10 @@ public class ExampleUnitTest {
 //        db.collection("restaurent01").get();
         //assertTrue(matcher.matches());
     }
+
+//    @Test
+//    public void test03() {
+//        this.localDb = AppDatabase.getInstance(getApplicationContext());
+//        List<User> users = this.localDb.userDao().findAll();
+//    }
 }
