@@ -3,7 +3,7 @@ package com.shawn.smartrestaurant.db.firebase;
 public class ShawnOrder {
 
     //
-    public static final String COLLECTION_RESTAURANTS = "restaurants";
+    public static final String COLLECTION_GROUPS = "groups";
 
     //
     public static final String COLLECTION_USERS = "users";
@@ -13,4 +13,7 @@ public class ShawnOrder {
 
     //
     public static final String COLLECTION_TABLES = "tables";
+
+    //
+    public static final String COLLECTION_CATEGORY = "category";
 }

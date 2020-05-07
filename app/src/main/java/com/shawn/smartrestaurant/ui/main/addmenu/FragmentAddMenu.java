@@ -2,12 +2,17 @@ package com.shawn.smartrestaurant.ui.main.addmenu;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.DrawableUtils;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
@@ -20,12 +25,21 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.transition.DrawableCrossFadeFactory;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.storage.StorageReference;
 import com.shawn.smartrestaurant.R;
+import com.shawn.smartrestaurant.db.entity.Dish;
+import com.shawn.smartrestaurant.db.entity.User;
+import com.shawn.smartrestaurant.db.firebase.ShawnOrder;
 import com.shawn.smartrestaurant.ui.main.MainActivity;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static androidx.core.content.FileProvider.getUriForFile;
 
@@ -42,9 +56,6 @@ public class FragmentAddMenu extends Fragment {
 
     //
     public static final int REQUEST_CODE_IMAGE_CAPTURE = 102;
-
-    //
-    public static final int RESULT_CODE_SUCCEEDED = -1;
 
     //
     public static final int RESULT_CODE_FAILED = 0;
@@ -143,7 +154,64 @@ public class FragmentAddMenu extends Fragment {
             if (Objects.requireNonNull(dishName.getText()).toString().isEmpty() || category.getText().toString().isEmpty() || Objects.requireNonNull(price.getText()).toString().isEmpty()) {
                 alertDisplay("Failed", "Dish Name, Category and Price should not be empty.", (dialog, which) -> {
                 });
+                return;
             }
+
+            User user = ((MainActivity) requireActivity()).getUser();
+
+            Dish dish = new Dish();
+            dish.setGroup(user.getGroup());
+            dish.setDishName(dishName.getText().toString().trim());
+            dish.setCategory(category.getText().toString().trim());
+            dish.setPrice(Double.parseDouble(price.getText().toString()));
+            dish.setCreateTime(System.currentTimeMillis());
+            dish.setUpdateTime(System.currentTimeMillis());
+            dish.setCreateUser(user.getId());
+            dish.setUpdateUser(user.getId());
+
+            ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_DISHES).whereEqualTo(Dish.COLUMN_DISH_NAME, dish.getDishName()).whereEqualTo(Dish.COLUMN_GROUP, dish.getGroup()).get().addOnCompleteListener(getExistTask -> {
+                if (getExistTask.isSuccessful()) {
+                    if (!Objects.requireNonNull(getExistTask.getResult()).isEmpty()) {
+                        alertDisplay("Failed", "This dish had already existed.", (dialog, which) -> {
+                        });
+                        return;
+                    }
+
+                    ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_DISHES).orderBy(Dish.COLUMN_ID, Query.Direction.DESCENDING).limit(1).get().addOnCompleteListener(getMaxIdTask -> {
+                        if (getMaxIdTask.isSuccessful()) {
+                            Dish maxIdDish = Objects.requireNonNull(getMaxIdTask.getResult()).toObjects(Dish.class).get(0);
+                            dish.setId(String.valueOf(Integer.parseInt(maxIdDish.getId()) + 1));
+
+                            ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_DISHES).document(dish.getId()).set(dish).addOnSuccessListener(aVoid -> {
+                                // Save image in Fire Storage
+                                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+
+                                ((BitmapDrawable) dishImage.getDrawable()).getBitmap().compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                                StorageReference storageReference = ((MainActivity) requireActivity()).getStorageReference().child(dish.getId() + ".jpg");
+
+                                storageReference.putBytes(stream.toByteArray()).addOnFailureListener(exception -> {
+                                    ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_DISHES).document(dish.getId()).delete().addOnFailureListener(e -> {
+                                        // TODO
+                                    });
+                                    alertDisplay("Failed", "Adding dish failed with unknown reasons.", (dialog, which) -> {
+                                    });
+                                }).addOnSuccessListener(taskSnapshot -> {
+                                    Bundle bundle = new Bundle();
+                                    bundle.putString("amount", "textAmount");
+                                    ((MainActivity) requireActivity()).getMenuNavHostFragment().getNavController().navigate(R.id.action_fragment_nav_addmenu_to_fragment_nav_menu, new Bundle());
+                                    ((MainActivity) requireActivity()).getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
+                                });
+                            });
+                        } else {
+                            alertDisplay("Failed", "Adding dish failed with unknown reasons.", (dialog, which) -> {
+                            });
+                        }
+                    });
+                } else {
+                    alertDisplay("Failed", "Adding dish failed with unknown reasons.", (dialog, which) -> {
+                    });
+                }
+            });
         });
 
         fetchFromAbulm.setOnClickListener(v -> {

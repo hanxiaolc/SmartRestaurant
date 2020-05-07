@@ -16,6 +16,8 @@ import android.view.ViewGroup;
 import com.shawn.smartrestaurant.R;
 import com.shawn.smartrestaurant.ui.main.MainActivity;
 
+import java.util.Objects;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -64,7 +66,7 @@ public class FragmentMenu extends Fragment {
 
         // Remember to set has option menu true
         setHasOptionsMenu(true);
-        ((MainActivity) getActivity()).setCurrentFragment(this);
+        ((MainActivity) requireActivity()).setCurrentFragment(this);
     }
 
     @Override

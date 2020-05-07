@@ -5,7 +5,7 @@ import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 
-import com.shawn.smartrestaurant.db.entity.User;
+import com.shawn.smartrestaurant.db.entity.Dish;
 
 import java.util.List;
 
@@ -13,35 +13,35 @@ import java.util.List;
  *
  */
 @Dao
-public interface UserDao {
+public interface DishDao {
 
     /**
      *
      */
-    @Query("SELECT * FROM user WHERE id = :id LIMIT 1")
-    User findById(String id);
+    @Query("SELECT * FROM dish WHERE id = :id LIMIT 1")
+    Dish findById(String id);
 
     /**
      *
      */
-    @Query("SELECT * FROM user")
-    List<User> findAll();
+    @Query("SELECT * FROM dish")
+    List<Dish> findAll();
 
     /**
      *
      */
     @Insert
-    void insertAll(User... users);
+    void insertAll(Dish... dishes);
 
     /**
      *
      */
     @Delete
-    void delete(User user);
+    void delete(Dish dish);
 
     /**
      *
      */
-    @Query("DELETE FROM user")
+    @Query("DELETE FROM dish")
     void deleteAll();
 }

@@ -62,7 +62,7 @@ public class LoginActivity extends AppCompatActivity {
                             AppDatabase localDb = AppDatabase.getInstance(getApplicationContext());
 
                             localDb.userDao().deleteAll();
-                            localDb.userDao().insertAll(user);
+                            localDb.userDao().insertAll(result);
 
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);

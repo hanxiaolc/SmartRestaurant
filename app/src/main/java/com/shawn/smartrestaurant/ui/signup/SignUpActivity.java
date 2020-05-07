@@ -18,6 +18,7 @@ import com.shawn.smartrestaurant.db.entity.User;
 import com.shawn.smartrestaurant.db.firebase.ShawnOrder;
 import com.shawn.smartrestaurant.ui.login.LoginActivity;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -56,7 +57,23 @@ public class SignUpActivity extends AppCompatActivity {
 
         // Set Sign Up button behavior
         buttonSignUp.setOnClickListener(v -> {
-            User user = new User(userId.getText().toString(), password.getText().toString(), companyCode.getText().toString(), email.getText().toString(), isOwner.isChecked());
+
+            // Check group exist.
+            if (!isOwner.isChecked()) {
+                alertDisplay("Failed", "You must register as a manager if your Restaurant Code is first time registered, or ask your manager for registering with his account", (dialog, which) -> {
+                });
+                return;
+            }
+
+            User user = new User();
+            user.setId(userId.getText().toString().trim());
+            user.setPassword(password.getText().toString().trim());
+            user.setGroup(companyCode.getText().toString().trim());
+            user.setEmail(email.getText().toString().trim());
+            user.setManager(isOwner.isChecked());
+            user.setStatus("on");
+            user.setCreateTime(new Date().getTime());
+            user.setUpdateTime(new Date().getTime());
 
             // Check empty
             if (user.checkIsEmpty()) {
@@ -87,59 +104,30 @@ public class SignUpActivity extends AppCompatActivity {
             }
 
             FirebaseFirestore db = FirebaseFirestore.getInstance();
-            db.collection(ShawnOrder.COLLECTION_RESTAURANTS).document(user.getGroup()).get().addOnCompleteListener(taskCheckGroup -> {
-                if (taskCheckGroup.isSuccessful()) {
-
-                    // Check group exist.
-                    if (!Objects.requireNonNull(taskCheckGroup.getResult()).exists()) {
-                        if (!user.isManager()) {
-                            alertDisplay("Failed", "You must register as a manager if your Restaurant Code is first time registered.", (dialog, which) -> {
-                            });
-                            return;
-                        }
-
-                        // Set a group document.
-                        db.collection(ShawnOrder.COLLECTION_RESTAURANTS).document(user.getGroup()).set(new HashMap()).addOnSuccessListener(aVoidSetGroup -> {
-
-                            // Register account.
-                            db.collection(ShawnOrder.COLLECTION_USERS).document(user.getId()).set(user).addOnSuccessListener(aVoid -> {
-                                alertDisplay("Successful", "Please login with your information.", (dialog, which) -> {
-                                    Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                    startActivity(intent);
-                                });
-                            }).addOnFailureListener(e -> {
-                                Log.w("FAILURE", "Error writing document", e);
-                            });
+            db.collection(ShawnOrder.COLLECTION_USERS).document(user.getId()).get().addOnCompleteListener(taskCheckUser -> {
+                if (taskCheckUser.isSuccessful()) {
+                    // Check user exist.
+                    if (Objects.requireNonNull(taskCheckUser.getResult()).exists()) {
+                        alertDisplay("Failed", "User had already existed.", (dialog, which) -> {
                         });
-                    } else {
-                        db.collection(ShawnOrder.COLLECTION_USERS).document(user.getId()).get().addOnCompleteListener(taskCheckUser -> {
-                            if (taskCheckUser.isSuccessful()) {
-
-                                // Check user exist.
-                                if (Objects.requireNonNull(taskCheckUser.getResult()).exists()) {
-                                    alertDisplay("Failed", "User had already existed.", (dialog, which) -> {
-                                    });
-                                    return;
-                                }
-
-                                // Register account.
-                                db.collection(ShawnOrder.COLLECTION_USERS).document(user.getId()).set(user).addOnSuccessListener(aVoid -> {
-                                    alertDisplay("Successful", "Please login with your information.", (dialog, which) -> {
-                                        Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
-                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                        startActivity(intent);
-                                    });
-                                }).addOnFailureListener(e -> {
-                                    Log.w("FAILURE", "Error writing document", e);
-                                });
-                            }
-                        });
+                        return;
                     }
+
+                    // Register account.
+                    db.collection(ShawnOrder.COLLECTION_USERS).document(user.getId()).set(user).addOnSuccessListener(aVoid -> {
+                        alertDisplay("Successful", "Please login with your information.", (dialog, which) -> {
+                            Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        });
+                    }).addOnFailureListener(e -> {
+                        Log.w("FAILURE", "Error writing document", e);
+                    });
                 }
             });
         });
     }
+
 
     /**
      *

@@ -12,34 +12,13 @@ import java.util.regex.Pattern;
 @Entity
 public class User {
 
-//    //
-//    public static final String ID = "id";
-//
-//    //
-//    public static final String PASSWORD = "password";
-//
-//    //
-//    public static final String EMAIL = "email";
-//
-//    //
-//    public static final String GROUP = "group";
-//
-//    //
-//    public static final String ROLE = "role";
-//
-//    //
-//    public static final String STATUS = "status";
-//
-//    //
-//    public static final String CREATE_TIME = "create_time";
-//
-//    //
-//    public static final String UPDATE_TIME = "update_time";
+    //
+    public static final String COLUMN_GROUP = "group";
 
     //
     @NonNull
     @PrimaryKey
-    private String id;
+    private String id = "";
 
     //
     @ColumnInfo
@@ -75,64 +54,35 @@ public class User {
     public User() {
     }
 
-    /**
-     *
-     */
-    @Ignore
-    public User(String id, String password, String group, String email, boolean isManager) {
-        this.id = id;
-        this.password = password;
-        this.group = group;
-        this.email = email;
-        this.isManager = isManager;
-        if (this.isManager) {
-            this.status = "on";
-        } else {
-            this.status = "pending";
-        }
-        this.createTime = new Date().getTime();
-        this.updateTime = new Date().getTime();
-    }
-
 //    /**
 //     *
 //     */
-//    public boolean isEmptyWithoutCompanyId() {
-//        if (null == this.userId || null == this.password || null == this.email) {
-//            return true;
+//    @Ignore
+//    public User(@NonNull String id, String password, String group, String email, boolean isManager) {
+//        this.id = id;
+//        this.password = password;
+//        this.group = group;
+//        this.email = email;
+//        this.isManager = isManager;
+//        if (this.isManager) {
+//            this.status = "on";
+//        } else {
+//            this.status = "pending";
 //        }
-//
-//        return this.userId.trim().isEmpty() || this.password.trim().isEmpty() || this.email.trim().isEmpty();
+//        this.createTime = new Date().getTime();
+//        this.updateTime = new Date().getTime();
 //    }
 
     /**
      *
      */
     public boolean checkIsEmpty() {
-        if (null == this.id || null == this.password || null == this.email || null == this.group) {
+        if (null == this.password || null == this.email || null == this.group) {
             return true;
         }
 
         return this.id.trim().isEmpty() || this.password.trim().isEmpty() || this.email.trim().isEmpty() || this.group.trim().isEmpty();
     }
-
-//    /**
-//     *
-//     */
-//    public Map toMap() {
-//        Map<String, Object> userMap = new HashMap<>();
-//
-//        userMap.put(ID, this.userId);
-//        userMap.put(PASSWORD, this.password);
-//        userMap.put(EMAIL, this.email);
-//        userMap.put(GROUP, this.companyCode);
-//        userMap.put(ROLE, this.isManager);
-//        userMap.put(STATUS, this.status);
-//        userMap.put(CREATE_TIME, this.createTime);
-//        userMap.put(UPDATE_TIME, this.updateTime);
-//
-//        return userMap;
-//    }
 
     /**
      * Validate if a User ID is legal.
@@ -152,7 +102,7 @@ public class User {
      */
     public boolean validateGroup() {
         // alphabets or numbers between 4 to 8 bite.
-        String REGEX_PATTERN_COMPANY = "[0-9]{4,4}";
+        String REGEX_PATTERN_COMPANY = "[0-9]{4}";
         return Pattern.compile(REGEX_PATTERN_COMPANY).matcher(this.group).matches();
     }
 
@@ -170,6 +120,7 @@ public class User {
     /**
      *
      */
+    @NonNull
     public String getId() {
         return id;
     }
@@ -177,7 +128,7 @@ public class User {
     /**
      *
      */
-    public void setId(String id) {
+    public void setId(@NonNull String id) {
         this.id = id;
     }
 

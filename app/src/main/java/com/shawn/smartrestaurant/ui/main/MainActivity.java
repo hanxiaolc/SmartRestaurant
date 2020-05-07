@@ -6,7 +6,6 @@ import android.view.MenuItem;
 import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -15,9 +14,15 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.shawn.smartrestaurant.R;
 import com.shawn.smartrestaurant.db.AppDatabase;
+import com.shawn.smartrestaurant.db.entity.Dish;
 import com.shawn.smartrestaurant.db.entity.User;
+import com.shawn.smartrestaurant.db.firebase.ShawnOrder;
 import com.shawn.smartrestaurant.ui.login.LoginActivity;
 import com.shawn.smartrestaurant.ui.main.addmenu.FragmentAddMenu;
 import com.shawn.smartrestaurant.ui.main.commit.FragmentCommit;
@@ -25,6 +30,8 @@ import com.shawn.smartrestaurant.ui.main.dishes.FragmentDishes;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
 /**
  *
@@ -33,6 +40,9 @@ public class MainActivity extends AppCompatActivity {
 
     //
     private AppDatabase localDb;
+
+    //
+    FirebaseFirestore db;
 
     //
     private User user;
@@ -64,6 +74,9 @@ public class MainActivity extends AppCompatActivity {
     //
     private AutoCompleteTextView autoCompleteTextView;
 
+    //
+    private StorageReference storageReference;
+
 
     /**
      *
@@ -72,9 +85,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        //
-//        this.autoCompleteTextView = findViewById(R.id.autoCompleteTextView_menu_category);
 
         // Set toolbar as action bar
         this.toolbar = findViewById(R.id.toolbar);
@@ -115,6 +125,12 @@ public class MainActivity extends AppCompatActivity {
 
         //
         drawerHeadUserId.setText(this.user.getId());
+
+        // Set Fire Storage reference
+        storageReference = FirebaseStorage.getInstance().getReference().child(ShawnOrder.COLLECTION_DISHES);
+
+        // Get Fire Cloud instance
+        db = FirebaseFirestore.getInstance();
 
         //
         if (0 == getSupportFragmentManager().getFragments().size()) {
@@ -316,6 +332,20 @@ public class MainActivity extends AppCompatActivity {
     /**
      *
      */
+    public FirebaseFirestore getDb() {
+        return db;
+    }
+
+    /**
+     *
+     */
+    public void setDb(FirebaseFirestore db) {
+        this.db = db;
+    }
+
+    /**
+     *
+     */
     public User getUser() {
         return user;
     }
@@ -325,5 +355,33 @@ public class MainActivity extends AppCompatActivity {
      */
     public void setUser(User user) {
         this.user = user;
+    }
+
+    /**
+     *
+     */
+    public StorageReference getStorageReference() {
+        return storageReference;
+    }
+
+    /**
+     *
+     */
+    public void setStorageReference(StorageReference storageReference) {
+        this.storageReference = storageReference;
+    }
+
+    /**
+     *
+     */
+    public NavHostFragment getMenuNavHostFragment() {
+        return menuNavHostFragment;
+    }
+
+    /**
+     *
+     */
+    public void setMenuNavHostFragment(NavHostFragment menuNavHostFragment) {
+        this.menuNavHostFragment = menuNavHostFragment;
     }
 }
