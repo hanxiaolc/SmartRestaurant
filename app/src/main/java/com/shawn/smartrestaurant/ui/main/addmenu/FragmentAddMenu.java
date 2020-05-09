@@ -9,10 +9,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.widget.DrawableUtils;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
 
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
@@ -25,8 +22,6 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.transition.DrawableCrossFadeFactory;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.storage.StorageReference;
@@ -39,26 +34,50 @@ import com.shawn.smartrestaurant.ui.main.MainActivity;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static androidx.core.content.FileProvider.getUriForFile;
 
 
 /**
- * A simple {@link Fragment} subclass.
- * Use the {@link FragmentAddMenu#newInstance} factory method to
- * create an instance of this fragment.
+ *
  */
 public class FragmentAddMenu extends Fragment {
 
     //
-    public static final int REQUEST_CODE_IMAGE_REQUEST = 101;
+    public static final String ARG_IMAGE_VIEW = "arg_image_view";
 
     //
-    public static final int REQUEST_CODE_IMAGE_CAPTURE = 102;
+    public static final String ARG_HAS_IMAGE = "arg_has_image";
 
     //
-    public static final int RESULT_CODE_FAILED = 0;
+    public static final String ARG_DISH_CODE = "arg_dish_code";
+
+    //
+    public static final String ARG_DISH_NAME = "arg_dish_name";
+
+    //
+    public static final String ARG_CATEGORY = "arg_category";
+
+    //
+    public static final String ARG_PRICE = "arg_price";
+
+    //
+    public static final String ARG_ACTION = "arg_action";
+
+    //
+    public static final String ACTION_UPDATE = "update";
+
+    //
+    public static final String ACTION_ADD = "add";
+
+    //
+    private static final int REQUEST_CODE_IMAGE_REQUEST = 101;
+
+    //
+    private static final int REQUEST_CODE_IMAGE_CAPTURE = 102;
+
+    //
+    private static final int RESULT_CODE_FAILED = 0;
 
     //
     private ArrayAdapter<String> adapter;
@@ -69,34 +88,50 @@ public class FragmentAddMenu extends Fragment {
     //
     private Uri tempImageUri;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    //
+    private byte[] imageView;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    //
+    private String dishCode;
 
-    public FragmentAddMenu() {
-        // Required empty public constructor
-    }
+    //
+    private String dishName;
+
+    //
+    private String category;
+
+    //
+    private Double price;
+
+    //
+    private boolean hasImage;
+
+    //
+    private String action;
+
 
     /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment FragmentAddMenu.
      */
-    // TODO: Rename and change types and number of parameters
-    public static FragmentAddMenu newInstance(String param1, String param2) {
+    public FragmentAddMenu() {
+    }
+
+
+    /**
+     *
+     */
+    private static FragmentAddMenu newInstance(byte[] imageView, String dishCode, String dishName, String category, String price, boolean hasImage, String action) {
         FragmentAddMenu fragment = new FragmentAddMenu();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putByteArray(ARG_IMAGE_VIEW, imageView);
+        args.putString(ARG_DISH_CODE, dishCode);
+        args.putString(ARG_DISH_NAME, dishName);
+        args.putString(ARG_CATEGORY, category);
+        args.putString(ARG_PRICE, price);
+        args.putBoolean(ARG_HAS_IMAGE, hasImage);
+        args.putString(ARG_ACTION, action);
         fragment.setArguments(args);
+
         return fragment;
     }
 
@@ -104,8 +139,13 @@ public class FragmentAddMenu extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            this.imageView = getArguments().getByteArray(ARG_IMAGE_VIEW);
+            this.dishCode = getArguments().getString(ARG_DISH_CODE);
+            this.dishName = getArguments().getString(ARG_DISH_NAME);
+            this.category = getArguments().getString(ARG_CATEGORY);
+            this.price = getArguments().getDouble(ARG_PRICE);
+            this.hasImage = getArguments().getBoolean(ARG_HAS_IMAGE);
+            this.action = getArguments().getString(ARG_ACTION);
         }
 
         ((MainActivity) requireActivity()).getActionBarDrawerToggle().setHomeAsUpIndicator(R.drawable.ic_arrow_back_black_24dp);
@@ -136,6 +176,11 @@ public class FragmentAddMenu extends Fragment {
         AutoCompleteTextView category = view.findViewById(R.id.autoCompleteTextView_add_menu_category);
         TextInputEditText price = view.findViewById(R.id.editText_add_menu_price);
         Button addToMenu = view.findViewById(R.id.button_add_to_menu);
+        if (action.equals(FragmentAddMenu.ACTION_ADD)) {
+            addToMenu.setText(R.string.button_add_to_menu);
+        } else {
+            addToMenu.setText(R.string.button_update);
+        }
         ImageButton fetchFromAbulm = view.findViewById(R.id.button_fetch_from_album);
         ImageButton takePhoto = view.findViewById(R.id.button_take_photo);
 
@@ -182,7 +227,11 @@ public class FragmentAddMenu extends Fragment {
                             Dish maxIdDish = Objects.requireNonNull(getMaxIdTask.getResult()).toObjects(Dish.class).get(0);
                             dish.setId(String.valueOf(Integer.parseInt(maxIdDish.getId()) + 1));
 
+                            // Save the new dish
                             ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_DISHES).document(dish.getId()).set(dish).addOnSuccessListener(aVoid -> {
+                            });
+
+                            if (null != dishImage.getDrawable()) {
                                 // Save image in Fire Storage
                                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
 
@@ -196,12 +245,15 @@ public class FragmentAddMenu extends Fragment {
                                     alertDisplay("Failed", "Adding dish failed with unknown reasons.", (dialog, which) -> {
                                     });
                                 }).addOnSuccessListener(taskSnapshot -> {
-                                    Bundle bundle = new Bundle();
-                                    bundle.putString("amount", "textAmount");
                                     ((MainActivity) requireActivity()).getMenuNavHostFragment().getNavController().navigate(R.id.action_fragment_nav_addmenu_to_fragment_nav_menu, new Bundle());
                                     ((MainActivity) requireActivity()).getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
                                 });
-                            });
+                            }
+
+//                            Bundle bundle = new Bundle();
+//                            bundle.putString("amount", "textAmount");
+                            ((MainActivity) requireActivity()).getMenuNavHostFragment().getNavController().navigate(R.id.action_fragment_nav_addmenu_to_fragment_nav_menu, new Bundle());
+                            ((MainActivity) requireActivity()).getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
                         } else {
                             alertDisplay("Failed", "Adding dish failed with unknown reasons.", (dialog, which) -> {
                             });
@@ -266,5 +318,145 @@ public class FragmentAddMenu extends Fragment {
                 .setPositiveButton("OK", listener);
         AlertDialog alertDialogButton = builder.create();
         alertDialogButton.show();
+    }
+
+    /**
+     *
+     */
+    public ArrayAdapter<String> getAdapter() {
+        return adapter;
+    }
+
+    /**
+     *
+     */
+    public void setAdapter(ArrayAdapter<String> adapter) {
+        this.adapter = adapter;
+    }
+
+    /**
+     *
+     */
+    public ImageView getDishImage() {
+        return dishImage;
+    }
+
+    /**
+     *
+     */
+    public void setDishImage(ImageView dishImage) {
+        this.dishImage = dishImage;
+    }
+
+    /**
+     *
+     */
+    public Uri getTempImageUri() {
+        return tempImageUri;
+    }
+
+    /**
+     *
+     */
+    public void setTempImageUri(Uri tempImageUri) {
+        this.tempImageUri = tempImageUri;
+    }
+
+    /**
+     *
+     */
+    public byte[] getImageView() {
+        return imageView;
+    }
+
+    /**
+     *
+     */
+    public void setImageView(byte[] imageView) {
+        this.imageView = imageView;
+    }
+
+    /**
+     *
+     */
+    public String getDishCode() {
+        return dishCode;
+    }
+
+    /**
+     *
+     */
+    public void setDishCode(String dishCode) {
+        this.dishCode = dishCode;
+    }
+
+    /**
+     *
+     */
+    public String getDishName() {
+        return dishName;
+    }
+
+    /**
+     *
+     */
+    public void setDishName(String dishName) {
+        this.dishName = dishName;
+    }
+
+    /**
+     *
+     */
+    public String getCategory() {
+        return category;
+    }
+
+    /**
+     *
+     */
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    /**
+     *
+     */
+    public Double getPrice() {
+        return price;
+    }
+
+    /**
+     *
+     */
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+
+    /**
+     *
+     */
+    public boolean isHasImage() {
+        return hasImage;
+    }
+
+    /**
+     *
+     */
+    public void setHasImage(boolean hasImage) {
+        this.hasImage = hasImage;
+    }
+
+    /**
+     *
+     */
+    public String getAction() {
+        return action;
+    }
+
+    /**
+     *
+     */
+    public void setAction(String action) {
+        this.action = action;
     }
 }

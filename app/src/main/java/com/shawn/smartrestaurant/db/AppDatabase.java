@@ -12,7 +12,7 @@ import com.shawn.smartrestaurant.db.entity.Dish;
 import com.shawn.smartrestaurant.db.entity.User;
 import com.shawn.smartrestaurant.db.local.LocalDb;
 
-@Database(entities = {User.class/**, Dish.class*/}, version = 1)
+@Database(entities = {User.class, Dish.class}, version = 2)
 public abstract class AppDatabase extends RoomDatabase {
 
     /**
@@ -20,10 +20,10 @@ public abstract class AppDatabase extends RoomDatabase {
      */
     public abstract UserDao userDao();
 
-//    /**
-//     *
-//     */
-//    public abstract DishDao dishDao();
+    /**
+     *
+     */
+    public abstract DishDao dishDao();
 
     /**
      *

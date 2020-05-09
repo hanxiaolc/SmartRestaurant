@@ -1,6 +1,7 @@
 package com.shawn.smartrestaurant.ui.main;
 
 import android.content.Intent;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.AutoCompleteTextView;
@@ -14,7 +15,6 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.material.navigation.NavigationView;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -28,10 +28,11 @@ import com.shawn.smartrestaurant.ui.main.addmenu.FragmentAddMenu;
 import com.shawn.smartrestaurant.ui.main.commit.FragmentCommit;
 import com.shawn.smartrestaurant.ui.main.dishes.FragmentDishes;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
 
 /**
  *
@@ -76,6 +77,12 @@ public class MainActivity extends AppCompatActivity {
 
     //
     private StorageReference storageReference;
+
+    //
+    private List<Dish> dishList;
+
+    //
+    private Map<String, BitmapDrawable> menuImageMap;
 
 
     /**
@@ -132,9 +139,14 @@ public class MainActivity extends AppCompatActivity {
         // Get Fire Cloud instance
         db = FirebaseFirestore.getInstance();
 
+        // Init dish list
+        dishList = new ArrayList<>();
+        menuImageMap = new HashMap<>();
+
         //
         if (0 == getSupportFragmentManager().getFragments().size()) {
             getSupportFragmentManager().beginTransaction().add(R.id.fragmentLayout_main, this.tablesNavHostFragment).commit();
+//            getSupportFragmentManager().beginTransaction().add(R.id.fragmentLayout_main, this.menuNavHostFragment).commit();
         }
     }
 
@@ -383,5 +395,19 @@ public class MainActivity extends AppCompatActivity {
      */
     public void setMenuNavHostFragment(NavHostFragment menuNavHostFragment) {
         this.menuNavHostFragment = menuNavHostFragment;
+    }
+
+    /**
+     *
+     */
+    public List<Dish> getDishList() {
+        return dishList;
+    }
+
+    /**
+     *
+     */
+    public void setDishList(List<Dish> dishList) {
+        this.dishList = dishList;
     }
 }

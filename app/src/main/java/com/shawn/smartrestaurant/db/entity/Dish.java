@@ -5,8 +5,10 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-import java.math.BigDecimal;
 
+/**
+ *
+ */
 @Entity
 public class Dish {
 
@@ -26,7 +28,11 @@ public class Dish {
 
     //
     @ColumnInfo
-    private String dishName = "";
+    private String dishCode;
+
+    //
+    @ColumnInfo
+    private String dishName;
 
     //
     @ColumnInfo
@@ -39,6 +45,14 @@ public class Dish {
     //
     @ColumnInfo
     private Double price;
+
+    //
+    @ColumnInfo
+    private int numbers;
+
+    //
+    @ColumnInfo
+    private boolean hasImage;
 
     //
     @ColumnInfo
@@ -74,6 +88,20 @@ public class Dish {
      */
     public void setId(@NonNull String id) {
         this.id = id;
+    }
+
+    /**
+     *
+     */
+    public String getDishCode() {
+        return dishCode;
+    }
+
+    /**
+     *
+     */
+    public void setDishCode(String dishCode) {
+        this.dishCode = dishCode;
     }
 
     /**
@@ -130,6 +158,34 @@ public class Dish {
      */
     public void setPrice(Double price) {
         this.price = price;
+    }
+
+    /**
+     *
+     */
+    public int getNumbers() {
+        return numbers;
+    }
+
+    /**
+     *
+     */
+    public void setNumbers(int numbers) {
+        this.numbers = numbers;
+    }
+
+    /**
+     *
+     */
+    public boolean isHasImage() {
+        return hasImage;
+    }
+
+    /**
+     *
+     */
+    public void setHasImage(boolean hasImage) {
+        this.hasImage = hasImage;
     }
 
     /**
