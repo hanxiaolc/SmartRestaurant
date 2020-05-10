@@ -100,6 +100,7 @@
                 android:id="@+id/autoCompleteTextView_add_menu_category"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:focusable="false"
                 android:inputType="none"
                 tools:ignore="LabelFor" />
         </com.google.android.material.textfield.TextInputLayout>

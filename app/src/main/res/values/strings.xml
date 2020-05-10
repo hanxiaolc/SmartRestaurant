@@ -27,7 +27,8 @@
     <string name="drawer_setting">SETTING</string>
     <string name="drawer_profile_image">PROFILE IMAGE</string>
     <string name="drawer_other">OTHER</string>
-    <string name="action_add">ADD</string>
+    <string name="button_add">ADD</string>
+    <string name="button_refresh">REFRESH</string>
     <string name="drawer_header_website">shawn.com</string>
     <string name="nav_app_bar_open_drawer_description">Open navigation drawer</string>
     <string name="nav_app_bar_close_drawer_description">Close navigation drawer</string>
@@ -43,4 +44,5 @@
     <string name="button_add_to_menu">ADD TO MENU</string>
     <string name="button_update">UPDATE</string>
     <string name="imageView_menu_dish_image_description">Dish image showed in menu</string>
+    <string name="imageView_menu_edit_image_description">Edit image showed in menu</string>
 </resources>

@@ -16,4 +16,7 @@ public class ShawnOrder {
 
     //
     public static final String COLLECTION_CATEGORY = "category";
+
+    //
+    public static final String COLLECTION_OTHERS = "others";
 }

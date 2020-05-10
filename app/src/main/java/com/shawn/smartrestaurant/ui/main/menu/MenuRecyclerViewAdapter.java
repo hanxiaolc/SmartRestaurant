@@ -1,9 +1,10 @@
 package com.shawn.smartrestaurant.ui.main.menu;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,22 +15,23 @@ import androidx.annotation.NonNull;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 import com.shawn.smartrestaurant.Code;
 import com.shawn.smartrestaurant.R;
 import com.shawn.smartrestaurant.db.entity.Dish;
-import com.shawn.smartrestaurant.db.firebase.ShawnOrder;
 import com.shawn.smartrestaurant.ui.main.addmenu.FragmentAddMenu;
 
 import java.io.ByteArrayOutputStream;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class MenuRecyclerViewAdapter extends RecyclerView.Adapter {
 
     //
     private List<Dish> dishList;
+
+    //
+    private Map<String, byte[]> menuImagesMap;
 
     /**
      *
@@ -63,10 +65,18 @@ public class MenuRecyclerViewAdapter extends RecyclerView.Adapter {
     /**
      *
      */
+    MenuRecyclerViewAdapter(List<Dish> dishList, Map<String, byte[]> menuImagesMap) {
+        this.dishList = dishList;
+        this.menuImagesMap = menuImagesMap;
+    }
+
+    /**
+     *
+     */
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int itemViewType) {
-        View itemViewTemp = null;
+        View itemViewTemp;
 
         if (itemViewType == (Code.MenuRecyclerViewType.HEADER.id)) {
             itemViewTemp = LayoutInflater.from(parent.getContext()).inflate(R.layout.recyclerview_group_title_menu, parent, false);
@@ -80,6 +90,7 @@ public class MenuRecyclerViewAdapter extends RecyclerView.Adapter {
     /**
      *
      */
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 
@@ -93,17 +104,21 @@ public class MenuRecyclerViewAdapter extends RecyclerView.Adapter {
             TextView dishName = holder.itemView.findViewById(R.id.textView_menu_dish_name);
             TextView dishPrice = holder.itemView.findViewById(R.id.textView_menu_dish_price);
             ImageView imageView = holder.itemView.findViewById(R.id.imageView_menu_image);
-
             dishCode.setText(dish.getDishCode());
+            if (dish.getDishCode().isEmpty()) {
+                dishCode.setVisibility(View.GONE);
+            }
             dishName.setText(dish.getDishName());
-            dishPrice.setText(String.valueOf(dish.getPrice()));
+            dishPrice.setText("$" + dish.getPrice());
 
             if (dish.isHasImage()) {
-                StorageReference storageReferenceDishes = FirebaseStorage.getInstance().getReference().child(ShawnOrder.COLLECTION_DISHES);
-                // TODO Add OnFailureListener
-                storageReferenceDishes.child(dish.getId() + ".jpg").getDownloadUrl().addOnSuccessListener(uri -> {
-                    Glide.with(holder.itemView).load(uri).into(imageView);
-                });
+                imageView.setImageBitmap(BitmapFactory.decodeByteArray(menuImagesMap.get(dish.getId()), 0, Objects.requireNonNull(menuImagesMap.get(dish.getId())).length));
+//                StorageReference storageReferenceDishes = FirebaseStorage.getInstance().getReference().child(ShawnOrder.COLLECTION_DISHES);
+//
+//                // TODO Add OnFailureListener
+//                storageReferenceDishes.child(dish.getId() + ".jpg").getDownloadUrl().addOnSuccessListener(uri -> {
+//                    Glide.with(holder.itemView).load(uri).into(imageView);
+//                });
             } else {
                 imageView.setImageResource(R.drawable.ic_crop_original_black_24dp);
             }

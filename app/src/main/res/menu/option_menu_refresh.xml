@@ -2,9 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/button_menu_add_menu"
-        android:icon="@drawable/ic_add_black_24dp"
-        android:title="@string/button_add"
+        android:id="@+id/button_menu_refresh"
+        android:icon="@drawable/ic_refresh_black_24dp"
+        android:title="@string/button_refresh"
         android:visible="true"
         app:showAsAction="always" />
 </menu>

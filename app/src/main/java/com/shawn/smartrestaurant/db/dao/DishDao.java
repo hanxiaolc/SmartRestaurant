@@ -36,6 +36,12 @@ public interface DishDao {
     /**
      *
      */
+    @Insert
+    void insert(Dish dish);
+
+    /**
+     *
+     */
     @Delete
     void delete(Dish dish);
 

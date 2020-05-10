@@ -66,8 +66,8 @@ public class ExampleInstrumentedTest {
 
     }
 
-    @Ignore
     @Test
+    @Ignore
     public void testSqlite() {
 
         // Context of the app under test.
@@ -99,8 +99,8 @@ public class ExampleInstrumentedTest {
 
     }
 
-    @Ignore
     @Test
+    @Ignore
     public void testMigration() {
 
         Migration MIGRATION_1_2 = new Migration(1, 2) {

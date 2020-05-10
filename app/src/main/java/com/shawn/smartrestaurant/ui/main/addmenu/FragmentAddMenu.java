@@ -172,6 +172,7 @@ public class FragmentAddMenu extends Fragment {
 
         // Get the elements of fragment
         dishImage = view.findViewById(R.id.imageView_dish_image);
+        TextInputEditText dishCode = view.findViewById(R.id.editText_add_menu_dish_code);
         TextInputEditText dishName = view.findViewById(R.id.editText_add_menu_dish_name);
         AutoCompleteTextView category = view.findViewById(R.id.autoCompleteTextView_add_menu_category);
         TextInputEditText price = view.findViewById(R.id.editText_add_menu_price);
@@ -180,6 +181,13 @@ public class FragmentAddMenu extends Fragment {
             addToMenu.setText(R.string.button_add_to_menu);
         } else {
             addToMenu.setText(R.string.button_update);
+
+            // Deliver dish information to update fragment
+            dishImage.setImageURI(this.tempImageUri);
+            dishCode.setText(this.dishCode);
+            dishName.setText(this.dishName);
+            category.setText(this.category);
+            price.setText(String.valueOf(this.price));
         }
         ImageButton fetchFromAbulm = view.findViewById(R.id.button_fetch_from_album);
         ImageButton takePhoto = view.findViewById(R.id.button_take_photo);
@@ -273,13 +281,13 @@ public class FragmentAddMenu extends Fragment {
 
         takePhoto.setOnClickListener(v -> {
             File tempImagePath = requireContext().getFilesDir();
-            if (null != Objects.requireNonNull(tempImagePath).listFiles()) {
-                for (File f : Objects.requireNonNull(tempImagePath.listFiles())) {
-                    if (f.getName().contains("jpg")) {
-                        f.delete();
-                    }
-                }
-            }
+//            if (null != Objects.requireNonNull(tempImagePath).listFiles()) {
+//                for (File f : Objects.requireNonNull(tempImagePath.listFiles())) {
+//                    if (f.getName().contains("jpg")) {
+//                        f.delete();
+//                    }
+//                }
+//            }
 
             File tempImage = new File(tempImagePath, System.currentTimeMillis() + ".jpg");
             tempImageUri = getUriForFile(requireActivity(), "com.shawn.smartrestaurant.fileprovider", tempImage);

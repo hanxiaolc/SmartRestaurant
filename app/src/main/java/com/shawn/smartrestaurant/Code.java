@@ -8,6 +8,12 @@ public class Code {
     //
     public static final String INITIAL_DISH_ID = "10000000";
 
+    //
+    public static final long ONE_MEGABYTE = 1024 * 1024 * 10;
+
+    //
+    public static final long TEN_MEGABYTE = ONE_MEGABYTE * 10;
+
     /**
      *
      */
