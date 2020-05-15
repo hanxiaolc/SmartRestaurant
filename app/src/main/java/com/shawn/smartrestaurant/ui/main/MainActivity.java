@@ -1,8 +1,12 @@
 package com.shawn.smartrestaurant.ui.main;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
@@ -15,8 +19,11 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -31,6 +38,7 @@ import com.shawn.smartrestaurant.ui.login.LoginActivity;
 import com.shawn.smartrestaurant.ui.main.addmenu.FragmentAddMenu;
 import com.shawn.smartrestaurant.ui.main.commit.FragmentCommit;
 import com.shawn.smartrestaurant.ui.main.dishes.FragmentDishes;
+import com.shawn.smartrestaurant.ui.main.setting.FragmentSetting;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -38,6 +46,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  *
@@ -90,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
 //    private List<byte[]> dishImageList;
 
     //
-    private Map<String, byte[]> menuImagesMap;
+    private Map<String, Bitmap> menuImagesMap;
 
     //
     private Other other;
@@ -120,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
         // Set drawer navigation view
         this.drawerNavigationView = findViewById(R.id.nav_view);
         // TODO
-        this.drawerNavigationView.getMenu().getItem(3).setActionView(R.layout.action_reminder_dot);
+        // this.drawerNavigationView.getMenu().getItem(3).setActionView(R.layout.action_reminder_dot);
         setUpDrawerMenu(this.drawerNavigationView);
 
         if (null == this.currentMenuItem) {
@@ -152,9 +163,15 @@ public class MainActivity extends AppCompatActivity {
         // Get Fire Cloud instance
         db = FirebaseFirestore.getInstance();
 
+        // Get extra information
+        db.collection(ShawnOrder.COLLECTION_OTHERS).whereEqualTo(Other.COLUMN_GROUP, user.getGroup()).limit(1).get().addOnSuccessListener(queryDocumentSnapshots -> {
+            this.other = queryDocumentSnapshots.getDocuments().get(0).toObject(Other.class);
+        });
+
         // Init dish list
         dishList = new ArrayList<>();
         menuImagesMap = new HashMap<>();
+        this.refreshMenu();
 
         //
         if (0 == getSupportFragmentManager().getFragments().size()) {
@@ -199,10 +216,9 @@ public class MainActivity extends AppCompatActivity {
                             //replaceFragment(new FragmentProfile());
 ////                            currentFragmentTitle = "PROFILE";
                             break;
-//                        case R.id.fragment_drawer_setting:
-////                            drawerMenuIndex = 1;
-////                            currentFragmentTitle = "SETTING";
-//                            break;
+                        case R.id.fragment_drawer_setting:
+                            getSupportFragmentManager().beginTransaction().replace(R.id.fragmentLayout_main, FragmentSetting.class, new Bundle()).commit();
+                            break;
                         default:
 ////                            drawerMenuIndex = 0;
                     }
@@ -272,19 +288,16 @@ public class MainActivity extends AppCompatActivity {
     /**
      *
      */
-    public void downloadMenuImages(List<Dish> dishList) {
+    public void refreshMenuImages() {
+        this.menuImagesMap.clear();
+//            this.clearFileDir();
 
-        if (null != dishList) {
-            this.menuImagesMap = new HashMap<>();
-            this.clearFileDir();
-
-            for (Dish dish : Objects.requireNonNull(dishList)) {
-                // TODO Add OnFailedListener
+        for (Dish dish : Objects.requireNonNull(this.dishList)) {
+            if (dish.isHasImage()) {
                 storageReference.child(dish.getId() + ".jpg").getBytes(Code.TEN_MEGABYTE).addOnSuccessListener(bytes -> {
-                    this.menuImagesMap.put(dish.getId(), bytes);
-                });
-
-                storageReference.child(dish.getId() + ".jpg").getFile(new File(getFilesDir(), dish.getId() + ".jpg")).addOnSuccessListener(taskSnapshot -> {
+                    this.menuImagesMap.put(dish.getId(), BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
+                }).addOnFailureListener(e -> {
+                    // TODO Add OnFailedListener
                 });
             }
         }
@@ -293,20 +306,70 @@ public class MainActivity extends AppCompatActivity {
     /**
      *
      */
-    public void refreshDishList(List<Dish> dishList) {
+//    public void refreshDishList(List<Dish> dishList) {
+//
+//        if (null != dishList) {
+//            this.dishList = new ArrayList<>();
+//            localDb.dishDao().deleteAll();
+//
+//            this.dishList = dishList;
+//
+//            for (Dish dish : Objects.requireNonNull(dishList)) {
+//                localDb.dishDao().insert(dish);
+//            }
+//        }
+//    }
 
-        if (null != dishList) {
-            this.dishList = new ArrayList<>();
-            localDb.dishDao().deleteAll();
+    /**
+     *
+     */
+//    public void getDbDishes(String group) {
+//
+//        //
+//        db.collection(ShawnOrder.COLLECTION_OTHERS).whereEqualTo(Other.COLUMN_GROUP, group).get().addOnCompleteListener(task -> {
+//            Other other = getOtherTask.getResult().getDocuments().get(0).toObject(Other.class);
+//            if (((MainActivity) requireActivity()).getOther().getMenuVersion() != other.getMenuVersion()) {
+//                ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_DISHES).whereEqualTo(Other.COLUMN_GROUP, ((MainActivity) requireActivity()).getUser().getGroup()).get().addOnCompleteListener(getDishesTask -> {
+//                    List<Dish> dishList = new ArrayList<>();
+//                    for () {
+//                        getDishesTask.getResult().getDocuments().
+//                    }
+//                    getDishesTask.getResult().getDocuments().
+//                });
+//            }
+//        }).addOnFailureListener(e -> {
+//            // TODO
+//        });
+//    }
 
-            this.dishList = dishList;
-
-            for (Dish dish : Objects.requireNonNull(dishList)) {
-                localDb.dishDao().insert(dish);
+    /**
+     *
+     */
+    public void refreshMenu() {
+        db.collection(ShawnOrder.COLLECTION_DISHES).whereEqualTo(Dish.COLUMN_GROUP, user.getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+            this.dishList.clear();
+            for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
+                dishList.add(ds.toObject(Dish.class));
             }
-        }
+
+            // refreshMenuImages
+            refreshMenuImages();
+        }).addOnFailureListener(e -> {
+            // TODO
+        });
     }
 
+//    /**
+//     *
+//     */
+//    public void checkVersionUp(Consumer consumer) {
+//        consumer.accept();
+//        db.collection(ShawnOrder.COLLECTION_OTHERS).whereEqualTo(Other.COLUMN_GROUP, user.getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+//            queryDocumentSnapshots.getDocuments().get(0).toObject(Other.class).getMenuVersion();
+//        });
+//        supplier
+//db.collection()
+//    }
 
     /**
      *
@@ -493,14 +556,14 @@ public class MainActivity extends AppCompatActivity {
     /**
      *
      */
-    public Map<String, byte[]> getMenuImagesMap() {
+    public Map<String, Bitmap> getMenuImagesMap() {
         return menuImagesMap;
     }
 
     /**
      *
      */
-    public void setMenuImagesMap(Map<String, byte[]> menuImagesMap) {
+    public void setMenuImagesMap(Map<String, Bitmap> menuImagesMap) {
         this.menuImagesMap = menuImagesMap;
     }
 

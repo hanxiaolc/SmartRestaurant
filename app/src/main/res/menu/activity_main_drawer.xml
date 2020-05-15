@@ -16,20 +16,24 @@
             android:id="@+id/fragment_drawer_profile"
             android:icon="@drawable/ic_person_black_24dp"
             android:title="@string/drawer_profile" />
+        <item
+            android:id="@+id/fragment_drawer_setting"
+            android:icon="@drawable/ic_settings_black_24dp"
+            android:title="@string/drawer_setting" />
         <!--        <item-->
         <!--            android:id="@+id/nav_slideshow"-->
         <!--            android:icon="@drawable/ic_menu_slideshow"-->
         <!--            android:title="@string/menu_slideshow" />-->
     </group>
-    <item android:title="@string/drawer_other">
-        <menu>
-            <item
-                android:id="@+id/fragment_drawer_setting"
-                android:icon="@drawable/ic_settings_black_24dp"
-                android:title="@string/drawer_setting" />
-            <!--            <item-->
-            <!--                android:id="@+id/nav_privacy_policy"-->
-            <!--                android:title="@string/privacy_policy" />-->
-        </menu>
-    </item>
+    <!--    <item android:title="@string/drawer_other">-->
+    <!--        <menu>-->
+    <!--            <item-->
+    <!--                android:id="@+id/fragment_drawer_setting"-->
+    <!--                android:icon="@drawable/ic_settings_black_24dp"-->
+    <!--                android:title="@string/drawer_setting" />-->
+    <!--            &lt;!&ndash;            <item&ndash;&gt;-->
+    <!--            &lt;!&ndash;                android:id="@+id/nav_privacy_policy"&ndash;&gt;-->
+    <!--            &lt;!&ndash;                android:title="@string/privacy_policy" />&ndash;&gt;-->
+    <!--        </menu>-->
+    <!--    </item>-->
 </menu>

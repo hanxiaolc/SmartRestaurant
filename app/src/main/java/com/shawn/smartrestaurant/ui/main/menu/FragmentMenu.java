@@ -1,9 +1,13 @@
 package com.shawn.smartrestaurant.ui.main.menu;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -28,9 +32,8 @@ import com.shawn.smartrestaurant.ui.main.addmenu.FragmentAddMenu;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 
 
 /**
@@ -39,6 +42,16 @@ import java.util.Objects;
  * create an instance of this fragment.
  */
 public class FragmentMenu extends Fragment {
+
+    //
+    private RecyclerView recyclerView;
+
+    //
+    private String dataStatus;
+
+    //
+    private RecyclerView.Adapter adapter;
+
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -70,6 +83,9 @@ public class FragmentMenu extends Fragment {
         return fragment;
     }
 
+    /**
+     *
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,12 +101,15 @@ public class FragmentMenu extends Fragment {
         ((MainActivity) requireActivity()).setCurrentFragment(this);
     }
 
+    /**
+     *
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         // Get Dish information from local DB and prepare group titles
-        List<Dish> dishList = prepareDishList(((MainActivity) requireActivity()).getLocalDb().dishDao().findAll());
+        //List<Dish> dishList = prepareDishList(((MainActivity) requireActivity()).getDishList());
 
         // TODO
 //        dishList.clear();
@@ -98,64 +117,19 @@ public class FragmentMenu extends Fragment {
 
         // Get the fragmentView and recyclerView
         View fragmentMenu = inflater.inflate(R.layout.fragment_nav_menu, container, false);
-        RecyclerView recyclerView = fragmentMenu.findViewById(R.id.recyclerView_menu);
+        this.recyclerView = fragmentMenu.findViewById(R.id.recyclerView_menu);
 
         // Set LayoutManager
         LinearLayoutManager manager = new LinearLayoutManager(getContext());
-        recyclerView.setLayoutManager(manager);
+        this.recyclerView.setLayoutManager(manager);
 
         // Set default dividing line
-        recyclerView.addItemDecoration(new DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL));
+        this.recyclerView.addItemDecoration(new DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL));
 
         // Bind RecyclerViewAdapter to recyclerView
-        recyclerView.setAdapter(new MenuRecyclerViewAdapter(dishList));
-
-        // Check menu version and refresh menu information if it is necessary
-        ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_OTHERS).whereEqualTo(Other.COLUMN_GROUP, ((MainActivity) requireActivity()).getUser().getGroup()).limit(1).get().addOnCompleteListener(taskGetLatestMenuVersion -> {
-
-            // Get the latest menu version
-            if (taskGetLatestMenuVersion.isSuccessful()) {
-                if (!Objects.requireNonNull(taskGetLatestMenuVersion.getResult()).isEmpty()) {
-                    ((MainActivity) requireActivity()).setOther(taskGetLatestMenuVersion.getResult().getDocuments().get(0).toObject(Other.class));
-                    int latestMenuVersion = ((MainActivity) requireActivity()).getOther().getMenuVersion();
-
-                    // Get the current menu version from local DB
-                    int menuVersion = ((MainActivity) requireActivity()).getLocalDb().otherDao().findById(((MainActivity) requireActivity()).getUser().getGroup()).getMenuVersion();
-
-                    if (menuVersion != latestMenuVersion) {
-
-                        // Refresh menu
-                        ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_DISHES).whereEqualTo(Dish.COLUMN_GROUP, (((MainActivity) requireActivity()).getUser().getGroup())).get().addOnCompleteListener(task -> {
-                            if (task.isSuccessful()) {
-                                if (!Objects.requireNonNull(task.getResult()).isEmpty()) {
-                                    List<Dish> result = new ArrayList<>();
-                                    for (DocumentSnapshot ds : task.getResult().getDocuments()) {
-                                        result.add(ds.toObject(Dish.class));
-                                    }
-
-                                    // Refresh menuImage
-                                    ((MainActivity) requireActivity()).downloadMenuImages(result);
-
-                                    ((MainActivity) requireActivity()).refreshDishList(result);
-
-                                    // Bind RecyclerViewAdapter to recyclerView
-//                                    recyclerView.setAdapter(new MenuRecyclerViewAdapter(prepareDishList(result)));
-                                    recyclerView.setAdapter(new MenuRecyclerViewAdapter(prepareDishList(result), ((MainActivity) requireActivity()).getMenuImagesMap()));
-                                    //
-
-
-                                }
-                            }
-                        }).addOnFailureListener(e -> {
-                            // TODO
-                            // Bind RecyclerViewAdapter to recyclerView
-                            recyclerView.setAdapter(new MenuRecyclerViewAdapter(dishList));
-                        });
-                    }
-                }
-            }
-        });
-
+        this.adapter = new MenuRecyclerViewAdapter(prepareDishList(((MainActivity) requireActivity()).getDishList()), ((MainActivity) requireActivity()).getMenuImagesMap());
+        // this.recyclerView.setAdapter(new MenuRecyclerViewAdapter(prepareDishList(((MainActivity) requireActivity()).getDishList()), ((MainActivity) requireActivity()).getMenuImagesMap()));
+        this.recyclerView.setAdapter(this.adapter);
         return fragmentMenu;
     }
 
@@ -165,7 +139,34 @@ public class FragmentMenu extends Fragment {
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
+
+        // Inflate add new menu
         inflater.inflate(R.menu.option_menu_add_menu, menu);
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_OTHERS).whereEqualTo(Other.COLUMN_GROUP, ((MainActivity) requireActivity()).getUser().getGroup()).get().addOnSuccessListener(getOtherQueryDocumentSnapshots -> {
+            if (((MainActivity) requireActivity()).getOther().getMenuVersion() != getOtherQueryDocumentSnapshots.getDocuments().get(0).toObject(Other.class).getMenuVersion()) {
+                ((MainActivity) requireActivity()).refreshMenu();
+                ((MainActivity) requireActivity()).setOther(getOtherQueryDocumentSnapshots.getDocuments().get(0).toObject(Other.class));
+
+                ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_DISHES).whereEqualTo(Dish.COLUMN_GROUP, ((MainActivity) requireActivity()).getUser().getGroup()).get().addOnSuccessListener(getMenuQueryDocumentSnapshots -> {
+                    List<Dish> list = new ArrayList<>();
+                    for (DocumentSnapshot ds : getMenuQueryDocumentSnapshots.getDocuments()) {
+                        list.add(ds.toObject(Dish.class));
+                    }
+                    ((MenuRecyclerViewAdapter) this.recyclerView.getAdapter()).setDishList(prepareDishList(list));
+                    ((MenuRecyclerViewAdapter) this.recyclerView.getAdapter()).setMenuImagesMap(((MainActivity) requireActivity()).getMenuImagesMap());
+                    this.recyclerView.getAdapter().notifyDataSetChanged();
+                });
+            }
+        });
     }
 
     /**
@@ -181,8 +182,12 @@ public class FragmentMenu extends Fragment {
             return true;
         }
         if (item.getItemId() == R.id.button_menu_refresh) {
-            bundle.putString(FragmentAddMenu.ARG_ACTION, FragmentAddMenu.ACTION_ADD);
-            NavHostFragment.findNavController(this).navigate(R.id.action_fragment_nav_menu_to_fragment_nav_addmenu, bundle);
+
+            // Update data in memory
+            ((MainActivity) requireActivity()).refreshMenu();
+
+            // Set memory data to recycler view
+            recyclerView.setAdapter(new MenuRecyclerViewAdapter(prepareDishList(((MainActivity) requireActivity()).getDishList())));
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -221,6 +226,46 @@ public class FragmentMenu extends Fragment {
         });
 
         return result;
+    }
+
+    /**
+     *
+     */
+    private void alertDisplay(String title, String message, DialogInterface.OnClickListener listener) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext())
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton("OK", listener);
+        AlertDialog alertDialogButton = builder.create();
+        alertDialogButton.show();
+    }
+
+    /**
+     *
+     */
+    public RecyclerView getRecyclerView() {
+        return recyclerView;
+    }
+
+    /**
+     *
+     */
+    public void setRecyclerView(RecyclerView recyclerView) {
+        this.recyclerView = recyclerView;
+    }
+
+    /**
+     *
+     */
+    public String getDataStatus() {
+        return dataStatus;
+    }
+
+    /**
+     *
+     */
+    public void setDataStatus(String dataStatus) {
+        this.dataStatus = dataStatus;
     }
 
     // TODO delete

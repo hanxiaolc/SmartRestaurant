@@ -5,6 +5,7 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import java.util.Map;
 import java.util.regex.Pattern;
 
 @Entity
@@ -14,13 +15,19 @@ public class Other {
     public static final String COLUMN_GROUP = "id";
 
     //
+    public static final String COLUMN_MENU_VERSION = "menuVersion";
+
+    //
+    public static final String COLUMN_QUANTITY_OF_TABLES = "quantityOfTables";
+
+    //
     @NonNull
     @PrimaryKey
     private String id = "";
 
     //
     @ColumnInfo
-    private int menuVersion;
+    private long menuVersion;
 
     //
     @ColumnInfo
@@ -51,14 +58,14 @@ public class Other {
     /**
      *
      */
-    public int getMenuVersion() {
+    public long getMenuVersion() {
         return menuVersion;
     }
 
     /**
      *
      */
-    public void setMenuVersion(int menuVersion) {
+    public void setMenuVersion(long menuVersion) {
         this.menuVersion = menuVersion;
     }
 

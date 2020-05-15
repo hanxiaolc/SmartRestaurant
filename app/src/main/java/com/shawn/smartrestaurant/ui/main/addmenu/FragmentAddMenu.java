@@ -3,6 +3,7 @@ package com.shawn.smartrestaurant.ui.main.addmenu;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -23,10 +24,12 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.storage.StorageReference;
 import com.shawn.smartrestaurant.R;
 import com.shawn.smartrestaurant.db.entity.Dish;
+import com.shawn.smartrestaurant.db.entity.Other;
 import com.shawn.smartrestaurant.db.entity.User;
 import com.shawn.smartrestaurant.db.firebase.ShawnOrder;
 import com.shawn.smartrestaurant.ui.main.MainActivity;
@@ -183,7 +186,9 @@ public class FragmentAddMenu extends Fragment {
             addToMenu.setText(R.string.button_update);
 
             // Deliver dish information to update fragment
-            dishImage.setImageURI(this.tempImageUri);
+            if (this.hasImage) {
+                dishImage.setImageBitmap(BitmapFactory.decodeByteArray(this.imageView, 0, this.imageView.length));
+            }
             dishCode.setText(this.dishCode);
             dishName.setText(this.dishName);
             category.setText(this.category);
@@ -214,6 +219,7 @@ public class FragmentAddMenu extends Fragment {
 
             Dish dish = new Dish();
             dish.setGroup(user.getGroup());
+            dish.setDishCode(dishCode.getText().toString().trim());
             dish.setDishName(dishName.getText().toString().trim());
             dish.setCategory(category.getText().toString().trim());
             dish.setPrice(Double.parseDouble(price.getText().toString()));
@@ -221,6 +227,11 @@ public class FragmentAddMenu extends Fragment {
             dish.setUpdateTime(System.currentTimeMillis());
             dish.setCreateUser(user.getId());
             dish.setUpdateUser(user.getId());
+            if (null != dishImage.getDrawable()) {
+                dish.setHasImage(true);
+            } else {
+                dish.setHasImage(false);
+            }
 
             ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_DISHES).whereEqualTo(Dish.COLUMN_DISH_NAME, dish.getDishName()).whereEqualTo(Dish.COLUMN_GROUP, dish.getGroup()).get().addOnCompleteListener(getExistTask -> {
                 if (getExistTask.isSuccessful()) {
@@ -258,8 +269,10 @@ public class FragmentAddMenu extends Fragment {
                                 });
                             }
 
-//                            Bundle bundle = new Bundle();
-//                            bundle.putString("amount", "textAmount");
+                            // Update menu version to others table.
+                            // TODO Add failure handling
+                            ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_OTHERS).document(user.getGroup()).update(Other.COLUMN_MENU_VERSION, System.currentTimeMillis());
+
                             ((MainActivity) requireActivity()).getMenuNavHostFragment().getNavController().navigate(R.id.action_fragment_nav_addmenu_to_fragment_nav_menu, new Bundle());
                             ((MainActivity) requireActivity()).getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
                         } else {
@@ -281,13 +294,6 @@ public class FragmentAddMenu extends Fragment {
 
         takePhoto.setOnClickListener(v -> {
             File tempImagePath = requireContext().getFilesDir();
-//            if (null != Objects.requireNonNull(tempImagePath).listFiles()) {
-//                for (File f : Objects.requireNonNull(tempImagePath.listFiles())) {
-//                    if (f.getName().contains("jpg")) {
-//                        f.delete();
-//                    }
-//                }
-//            }
 
             File tempImage = new File(tempImagePath, System.currentTimeMillis() + ".jpg");
             tempImageUri = getUriForFile(requireActivity(), "com.shawn.smartrestaurant.fileprovider", tempImage);

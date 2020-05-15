@@ -67,7 +67,7 @@ public class ExampleInstrumentedTest {
     }
 
     @Test
-    @Ignore
+    //@Ignore
     public void testSqlite() {
 
         // Context of the app under test.

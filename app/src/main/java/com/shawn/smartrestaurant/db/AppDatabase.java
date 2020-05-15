@@ -14,7 +14,7 @@ import com.shawn.smartrestaurant.db.entity.Other;
 import com.shawn.smartrestaurant.db.entity.User;
 import com.shawn.smartrestaurant.db.local.LocalDb;
 
-@Database(entities = {User.class, Dish.class, Other.class}, version = 3)
+@Database(entities = {User.class, Dish.class/**, Other.class*/}, version = 2)
 public abstract class AppDatabase extends RoomDatabase {
 
     /**
@@ -30,7 +30,7 @@ public abstract class AppDatabase extends RoomDatabase {
     /**
      *
      */
-    public abstract OtherDao otherDao();
+//    public abstract OtherDao otherDao();
 
     /**
      *

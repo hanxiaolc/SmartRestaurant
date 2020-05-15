@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,9 +16,14 @@ import androidx.annotation.NonNull;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.shawn.smartrestaurant.Code;
 import com.shawn.smartrestaurant.R;
 import com.shawn.smartrestaurant.db.entity.Dish;
+import com.shawn.smartrestaurant.db.firebase.ShawnOrder;
+import com.shawn.smartrestaurant.ui.main.MainActivity;
 import com.shawn.smartrestaurant.ui.main.addmenu.FragmentAddMenu;
 
 import java.io.ByteArrayOutputStream;
@@ -31,7 +37,10 @@ public class MenuRecyclerViewAdapter extends RecyclerView.Adapter {
     private List<Dish> dishList;
 
     //
-    private Map<String, byte[]> menuImagesMap;
+    private Map<String, Bitmap> menuImagesMap;
+
+    //
+    private StorageReference storageReferenceDishes;
 
     /**
      *
@@ -65,7 +74,7 @@ public class MenuRecyclerViewAdapter extends RecyclerView.Adapter {
     /**
      *
      */
-    MenuRecyclerViewAdapter(List<Dish> dishList, Map<String, byte[]> menuImagesMap) {
+    MenuRecyclerViewAdapter(List<Dish> dishList, Map<String, Bitmap> menuImagesMap) {
         this.dishList = dishList;
         this.menuImagesMap = menuImagesMap;
     }
@@ -112,13 +121,14 @@ public class MenuRecyclerViewAdapter extends RecyclerView.Adapter {
             dishPrice.setText("$" + dish.getPrice());
 
             if (dish.isHasImage()) {
-                imageView.setImageBitmap(BitmapFactory.decodeByteArray(menuImagesMap.get(dish.getId()), 0, Objects.requireNonNull(menuImagesMap.get(dish.getId())).length));
-//                StorageReference storageReferenceDishes = FirebaseStorage.getInstance().getReference().child(ShawnOrder.COLLECTION_DISHES);
-//
-//                // TODO Add OnFailureListener
-//                storageReferenceDishes.child(dish.getId() + ".jpg").getDownloadUrl().addOnSuccessListener(uri -> {
-//                    Glide.with(holder.itemView).load(uri).into(imageView);
-//                });
+                if (null != this.menuImagesMap.get(dish.getId())) {
+                    imageView.setImageBitmap(this.menuImagesMap.get(dish.getId()));
+                } else {
+                    // TODO Add OnFailureListener
+                    FirebaseStorage.getInstance().getReference().child(ShawnOrder.COLLECTION_DISHES).child(dish.getId() + ".jpg").getDownloadUrl().addOnSuccessListener(uri -> {
+                        Glide.with(holder.itemView).load(uri).into(imageView);
+                    });
+                }
             } else {
                 imageView.setImageResource(R.drawable.ic_crop_original_black_24dp);
             }
@@ -126,14 +136,17 @@ public class MenuRecyclerViewAdapter extends RecyclerView.Adapter {
             holder.itemView.setOnClickListener(view -> {
                 Bundle bundle = new Bundle();
 
-                // Transfer imageView to be a byte array
-                BitmapDrawable bitmapDrawable = ((BitmapDrawable) imageView.getDrawable());
-                Bitmap bitmap = bitmapDrawable.getBitmap();
-                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream);
-                byte[] imageInByte = stream.toByteArray();
+                if (dish.isHasImage()) {
+                    // Transfer imageView to be a byte array
+                    BitmapDrawable bitmapDrawable = ((BitmapDrawable) imageView.getDrawable());
+                    Bitmap bitmap = bitmapDrawable.getBitmap();
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 80, stream);
+                    byte[] imageInByte = stream.toByteArray();
 
-                bundle.putByteArray(FragmentAddMenu.ARG_IMAGE_VIEW, imageInByte);
+                    bundle.putByteArray(FragmentAddMenu.ARG_IMAGE_VIEW, imageInByte);
+                }
+
                 bundle.putBoolean(FragmentAddMenu.ARG_HAS_IMAGE, dish.isHasImage());
                 bundle.putString(FragmentAddMenu.ARG_DISH_CODE, dish.getDishCode());
                 bundle.putString(FragmentAddMenu.ARG_DISH_NAME, dish.getDishName());
@@ -162,5 +175,33 @@ public class MenuRecyclerViewAdapter extends RecyclerView.Adapter {
     public int getItemViewType(int position) {
         return null == dishList.get(position).getDishName() ?
                 Code.MenuRecyclerViewType.HEADER.id : Code.MenuRecyclerViewType.ITEM.id;
+    }
+
+    /**
+     *
+     */
+    public List<Dish> getDishList() {
+        return dishList;
+    }
+
+    /**
+     *
+     */
+    public void setDishList(List<Dish> dishList) {
+        this.dishList = dishList;
+    }
+
+    /**
+     *
+     */
+    public Map<String, Bitmap> getMenuImagesMap() {
+        return menuImagesMap;
+    }
+
+    /**
+     *
+     */
+    public void setMenuImagesMap(Map<String, Bitmap> menuImagesMap) {
+        this.menuImagesMap = menuImagesMap;
     }
 }

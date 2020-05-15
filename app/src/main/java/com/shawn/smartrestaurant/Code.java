@@ -9,7 +9,10 @@ public class Code {
     public static final String INITIAL_DISH_ID = "10000000";
 
     //
-    public static final long ONE_MEGABYTE = 1024 * 1024 * 10;
+    public static final int MAX_NUMBER_OF_TABLES = 15;
+
+    //
+    private static final long ONE_MEGABYTE = 1024 * 1024 * 10;
 
     //
     public static final long TEN_MEGABYTE = ONE_MEGABYTE * 10;
@@ -71,6 +74,56 @@ public class Code {
          *
          */
         MenuRecyclerViewType(int id, String value) {
+            this.id = id;
+            this.value = value;
+        }
+    }
+
+    /**
+     *
+     */
+    public enum DataStatus {
+
+        /**
+         *
+         */
+        LATEST(0, "latest"), UPDATED(1, "updated");
+
+        //
+        public int id;
+
+        //
+        public String value;
+
+        /**
+         *
+         */
+        DataStatus(int id, String value) {
+            this.id = id;
+            this.value = value;
+        }
+    }
+
+    /**
+     *
+     */
+    public enum TableStatus {
+
+        /**
+         *
+         */
+        READY(0, "ready"), ON_SERVICE(1, "onService"), CLEAN_UP(3, "cleanUp");
+
+        //
+        public int id;
+
+        //
+        public String value;
+
+        /**
+         *
+         */
+        TableStatus(int id, String value) {
             this.id = id;
             this.value = value;
         }

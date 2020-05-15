@@ -38,6 +38,7 @@
     <string name="edit_text_dish_name">DISH NAME</string>
     <string name="edit_text_dish_code">DISH CODE</string>
     <string name="auto_complete_text_category">CATEGORY</string>
+    <string name="auto_complete_text_number_of_tables">NUMBER OF TABLES</string>
     <string name="helper_text_required">required</string>
     <string name="helper_text_add_menu_dish_code">A short name for a dish, ex:D01. Not required.</string>
     <string name="edit_text_add_menu_price">PRICE</string>
@@ -45,4 +46,5 @@
     <string name="button_update">UPDATE</string>
     <string name="imageView_menu_dish_image_description">Dish image showed in menu</string>
     <string name="imageView_menu_edit_image_description">Edit image showed in menu</string>
+    <string name="imageView_menu_table_image_description">Edit image showed in table</string>
 </resources>

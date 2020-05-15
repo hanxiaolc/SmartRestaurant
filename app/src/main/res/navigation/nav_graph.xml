@@ -39,13 +39,14 @@
             app:destination="@id/fragment_dishes" />
     </fragment>
     <!--    <fragment-->
+    <!--        android:id="@+id/fragment_drawer_setting"-->
+    <!--        android:name="com.shawn.smartrestaurant.ui.main.setting.FragmentSetting"-->
+    <!--        android:label="@string/drawer_setting"-->
+    <!--        tools:layout="@layout/fragment_drawer_setting" />-->
+    <!--    <fragment-->
     <!--        android:id="@+id/fragment_drawer_profile"-->
     <!--        android:name="com.shawn.smartrestaurant.ui.main.FragmentProfile"-->
     <!--        android:label="@string/drawer_profile"-->
     <!--        tools:layout="@layout/fragment_drawer_profile" />-->
-    <!--    <fragment-->
-    <!--        android:id="@+id/fragment_drawer_setting"-->
-    <!--        android:name="com.shawn.smartrestaurant.ui.main.FragmentSetting"-->
-    <!--        android:label="@string/drawer_setting"-->
-    <!--        tools:layout="@layout/fragment_drawer_setting" />-->
+
 </navigation>
