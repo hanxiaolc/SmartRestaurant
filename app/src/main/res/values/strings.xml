@@ -47,4 +47,7 @@
     <string name="imageView_menu_dish_image_description">Dish image showed in menu</string>
     <string name="imageView_menu_edit_image_description">Edit image showed in menu</string>
     <string name="imageView_menu_table_image_description">Edit image showed in table</string>
+    <string name="textView_tables_start_time_description">Start:</string>
+    <!--    <string name="textView_tables_end_time_description">End:</string>-->
+    <string name="textView_tables_price_description">Total:</string>
 </resources>

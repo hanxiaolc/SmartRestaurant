@@ -1,23 +1,34 @@
 package com.shawn.smartrestaurant.ui.main.tables;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.navigation.Navigation;
-import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.shawn.smartrestaurant.R;
+import com.shawn.smartrestaurant.db.entity.Table;
+import com.shawn.smartrestaurant.ui.main.dishes.FragmentDishes;
 
+import java.text.SimpleDateFormat;
+import java.util.List;
+
+/**
+ *
+ */
 public class TablesRecyclerViewAdapter extends RecyclerView.Adapter {
 
-    private String[] mDataset = {"hanxiao1", "hanxiao2", "hanxiao3", "hanxiao4", "hanxiao5", "hanxiao1", "hanxiao2", "hanxiao3", "hanxiao4", "hanxiao5", "hanxiao1", "hanxiao2", "hanxiao3", "hanxiao4", "hanxiao5"};
+    //
+    private List<Table> tableList;
 
+    /**
+     *
+     */
     public static class TablesRecyclerViewAdapterViewHolder extends RecyclerView.ViewHolder {
 
         View view;
@@ -28,6 +39,16 @@ public class TablesRecyclerViewAdapter extends RecyclerView.Adapter {
         }
     }
 
+    /**
+     *
+     */
+    public TablesRecyclerViewAdapter(List<Table> tableList) {
+        this.tableList = tableList;
+    }
+
+    /**
+     *
+     */
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -35,24 +56,67 @@ public class TablesRecyclerViewAdapter extends RecyclerView.Adapter {
         return new TablesRecyclerViewAdapterViewHolder(tablesItemView);
     }
 
+    /**
+     *
+     */
+    @SuppressLint("SimpleDateFormat")
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        String item = mDataset[position];
-        TextView textView = holder.itemView.findViewById(R.id.tables_itemView_textView);
-        ImageView imageView = holder.itemView.findViewById(R.id.tables_itemView_imageView);
-        textView.setText(item);
-        imageView.setImageResource(R.drawable.ic_people_black_24dp);
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+        Table table = this.tableList.get(position);
+
+        TextView id = holder.itemView.findViewById(R.id.textView_table_id);
+        TextView time = holder.itemView.findViewById(R.id.linearLayout_table_time);
+        TextView startTime = holder.itemView.findViewById(R.id.textView_table_start_time);
+        TextView price = holder.itemView.findViewById(R.id.textView_table_price);
+        TextView status = holder.itemView.findViewById(R.id.textView_table_status);
+
+        id.setText(table.getId());
+        status.setText(table.getStatus());
+
+        if (null == table.getStartTime() && null == table.getPrice()) {
+            time.setVisibility(View.GONE);
+            price.setVisibility(View.GONE);
+        } else {
+            startTime.setText(new SimpleDateFormat("HH:mm").format(table.getStartTime()));
+            price.setText("$" + table.getPrice());
+        }
+
         holder.itemView.setOnClickListener(view -> {
-            String text = ((TextView) view.findViewById(R.id.tables_itemView_textView)).getText().toString();
             Bundle bundle = new Bundle();
-            bundle.putString("amount", text);
+
+            bundle.putString(FragmentDishes.ARG_TABLE_ID, table.getId());
+            bundle.putString(FragmentDishes.ARG_TABLE_STATUS, table.getStatus());
+            if (null != table.getStartTime()) {
+                bundle.getLong(FragmentDishes.ARG_TABLE_START_TIME, table.getStartTime().getTime());
+            }
+            if (null != table.getPrice()) {
+                bundle.putDouble(FragmentDishes.ARG_TABLE_PRICE, table.getPrice());
+            }
+
             Navigation.findNavController(view)
                     .navigate(R.id.action_fragment_tables_to_fragment_dishes, bundle);
         });
     }
 
+    /**
+     *
+     */
     @Override
     public int getItemCount() {
-        return mDataset.length;
+        return tableList.size();
+    }
+
+    /**
+     *
+     */
+    public List<Table> getTableList() {
+        return tableList;
+    }
+
+    /**
+     *
+     */
+    public void setTableList(List<Table> tableList) {
+        this.tableList = tableList;
     }
 }

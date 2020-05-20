@@ -3,6 +3,7 @@ package com.shawn.smartrestaurant.ui.main.tables;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.fragment.app.Fragment;
@@ -12,6 +13,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -19,10 +21,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.shawn.smartrestaurant.R;
+import com.shawn.smartrestaurant.db.entity.Table;
+import com.shawn.smartrestaurant.db.firebase.ShawnOrder;
 import com.shawn.smartrestaurant.ui.main.MainActivity;
 
+import org.w3c.dom.Document;
+
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -68,7 +76,9 @@ public class FragmentTables extends Fragment {
         return fragment;
     }
 
-
+    /**
+     *
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,22 +97,42 @@ public class FragmentTables extends Fragment {
         }
     }
 
+    /**
+     *
+     */
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        // 找到目标控件
         View fragmentTables = inflater.inflate(R.layout.framelayout_nav_tables, container, false);
         RecyclerView recyclerView = fragmentTables.findViewById(R.id.tables_recyclerView);
 
-        // 垂直线性布局
         LinearLayoutManager manager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(manager);
+        recyclerView.addItemDecoration(new DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL));
 
-        // 初始化适配器并绑定
-        TablesRecyclerViewAdapter tablesRecyclerViewAdapter = new TablesRecyclerViewAdapter();
+        TablesRecyclerViewAdapter tablesRecyclerViewAdapter = new TablesRecyclerViewAdapter(new ArrayList<>());
         recyclerView.setAdapter(tablesRecyclerViewAdapter);
 
         return fragmentTables;
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+
+        ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).whereEqualTo(Table.COLUMN_GROUP, ((MainActivity) requireActivity()).getUser().getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+            RecyclerView recyclerView = view.findViewById(R.id.tables_recyclerView);
+            TablesRecyclerViewAdapter adapter = (TablesRecyclerViewAdapter) recyclerView.getAdapter();
+
+            int i = 0;
+            for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
+                adapter.getTableList().add(ds.toObject(Table.class));
+                adapter.notifyItemInserted(i);
+                i++;
+            }
+        });
     }
 }

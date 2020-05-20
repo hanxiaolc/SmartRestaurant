@@ -112,7 +112,7 @@ public class Code {
         /**
          *
          */
-        READY(0, "ready"), ON_SERVICE(1, "onService"), CLEAN_UP(3, "cleanUp");
+        READY(0, "READY"), ON_SERVICE(1, "ON SERVICE"), CLEAN_UP(3, "CLEANUP"), STAND_BY(4, "STANDBY");
 
         //
         public int id;

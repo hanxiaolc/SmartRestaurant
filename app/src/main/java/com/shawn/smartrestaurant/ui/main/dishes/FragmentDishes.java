@@ -24,8 +24,12 @@ import android.view.ViewGroup;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.shawn.smartrestaurant.R;
+import com.shawn.smartrestaurant.db.entity.Dish;
 import com.shawn.smartrestaurant.ui.main.MainActivity;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 
@@ -38,14 +42,17 @@ public class FragmentDishes extends Fragment {
 
     RecyclerView dishesRecyclerView;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    public static final String ARG_TABLE_ID = "tableId";
+    public static final String ARG_TABLE_START_TIME = "tableStartTime";
+    public static final String ARG_TABLE_PRICE = "tablePrice";
+    public static final String ARG_TABLE_STATUS = "tableStatus";
+    public static final String ARG_TABLE_DISHLIST = "tableDishList";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private String tableId;
+    private String tableStartTime;
+    private Double tablePrice;
+    private String tableStatus;
+    private List<Dish> tableDishList;
 
     public FragmentDishes() {
         // Required empty public constructor
@@ -55,16 +62,19 @@ public class FragmentDishes extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
+     * @param tableId        Parameter tableId.
+     * @param tableStartTime Parameter tableStartTime.
+     * @param tablePrice     Parameter tablePrice.
+     * @param tableStatus    Parameter tableStatus.
      * @return A new instance of fragment framelayout_nav_dishes.
      */
-    // TODO: Rename and change types and number of parameters
-    public static FragmentDishes newInstance(String param1, String param2) {
+    public static FragmentDishes newInstance(String tableId, String tableStartTime, Double tablePrice, String tableStatus) {
         FragmentDishes fragment = new FragmentDishes();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putString(ARG_TABLE_ID, tableId);
+        args.putString(ARG_TABLE_START_TIME, tableStartTime);
+        args.putDouble(ARG_TABLE_PRICE, tablePrice);
+        args.putString(ARG_TABLE_STATUS, tableStatus);
         fragment.setArguments(args);
         return fragment;
     }
@@ -73,8 +83,10 @@ public class FragmentDishes extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            this.tableId = getArguments().getString(ARG_TABLE_ID);
+            this.tableStartTime = getArguments().getString(ARG_TABLE_START_TIME);
+            this.tablePrice = getArguments().getDouble(ARG_TABLE_PRICE);
+            this.tableStatus = getArguments().getString(ARG_TABLE_STATUS);
         }
 
         ((MainActivity) getActivity()).getActionBarDrawerToggle().setHomeAsUpIndicator(R.drawable.ic_arrow_back_black_24dp);

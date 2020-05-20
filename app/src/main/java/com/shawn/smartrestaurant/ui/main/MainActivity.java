@@ -32,6 +32,7 @@ import com.shawn.smartrestaurant.R;
 import com.shawn.smartrestaurant.db.AppDatabase;
 import com.shawn.smartrestaurant.db.entity.Dish;
 import com.shawn.smartrestaurant.db.entity.Other;
+import com.shawn.smartrestaurant.db.entity.Table;
 import com.shawn.smartrestaurant.db.entity.User;
 import com.shawn.smartrestaurant.db.firebase.ShawnOrder;
 import com.shawn.smartrestaurant.ui.login.LoginActivity;
@@ -98,13 +99,13 @@ public class MainActivity extends AppCompatActivity {
     private List<Dish> dishList;
 
     //
-//    private List<byte[]> dishImageList;
-
-    //
     private Map<String, Bitmap> menuImagesMap;
 
     //
     private Other other;
+
+    //
+    private List<Table> tableList;
 
 
     /**
@@ -162,6 +163,11 @@ public class MainActivity extends AppCompatActivity {
 
         // Get Fire Cloud instance
         db = FirebaseFirestore.getInstance();
+
+        // Get Tables information
+        db.collection(ShawnOrder.COLLECTION_TABLES).whereEqualTo(Table.COLUMN_GROUP, user.getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+
+        });
 
         // Get extra information
         db.collection(ShawnOrder.COLLECTION_OTHERS).whereEqualTo(Other.COLUMN_GROUP, user.getGroup()).limit(1).get().addOnSuccessListener(queryDocumentSnapshots -> {
@@ -539,20 +545,6 @@ public class MainActivity extends AppCompatActivity {
         this.dishList = dishList;
     }
 
-//    /**
-//     *
-//     */
-//    public List<byte[]> getDishImageList() {
-//        return dishImageList;
-//    }
-//
-//    /**
-//     *
-//     */
-//    public void setDishImageList(List<byte[]> dishImageList) {
-//        this.dishImageList = dishImageList;
-//    }
-
     /**
      *
      */
@@ -579,5 +571,19 @@ public class MainActivity extends AppCompatActivity {
      */
     public void setOther(Other other) {
         this.other = other;
+    }
+
+    /**
+     *
+     */
+    public List<Table> getTableList() {
+        return tableList;
+    }
+
+    /**
+     *
+     */
+    public void setTableList(List<Table> tableList) {
+        this.tableList = tableList;
     }
 }

@@ -13,6 +13,9 @@
         <action
             android:id="@+id/action_fragment_tables_to_fragment_dishes"
             app:destination="@id/fragment_dishes" />
+        <action
+            android:id="@+id/action_fragment_tables_to_fragment_commit"
+            app:destination="@id/fragment_commit" />
     </fragment>
     <fragment
         android:id="@+id/fragment_dishes"

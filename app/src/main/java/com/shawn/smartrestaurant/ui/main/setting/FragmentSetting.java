@@ -6,7 +6,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 
@@ -14,11 +14,8 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.shawn.smartrestaurant.Code;
 import com.shawn.smartrestaurant.R;
-import com.shawn.smartrestaurant.db.entity.Dish;
-import com.shawn.smartrestaurant.db.entity.Other;
 import com.shawn.smartrestaurant.db.entity.Table;
 import com.shawn.smartrestaurant.db.firebase.ShawnOrder;
 import com.shawn.smartrestaurant.ui.main.MainActivity;
@@ -26,14 +23,15 @@ import com.shawn.smartrestaurant.ui.main.addmenu.FragmentAddMenu;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class FragmentSetting extends Fragment {
 
     //
-    AutoCompleteTextView numberOfTables;
+    private AutoCompleteTextView numberOfTables;
 
     //
-    ArrayAdapter<Integer> adapter;
+    private ArrayAdapter<Integer> adapter;
 
     /**
      *
@@ -105,8 +103,13 @@ public class FragmentSetting extends Fragment {
         }
 
         this.numberOfTables.setAdapter(this.adapter);
-        // TODO
-        this.numberOfTables.setText(String.valueOf(1), false);
+
+
+        // TODO Add onFailureListener
+        ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).whereEqualTo(Table.COLUMN_GROUP, ((MainActivity) requireActivity()).getUser().getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+            this.numberOfTables.setText(String.valueOf(queryDocumentSnapshots.getDocuments().size()), false);
+
+        });
 
         this.numberOfTables.addTextChangedListener(new TextWatcher() {
 
@@ -126,6 +129,11 @@ public class FragmentSetting extends Fragment {
              */
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                // Block UI and show progress bar
+                requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                requireView().findViewById(R.id.progressBar_setting).setVisibility(View.VISIBLE);
+
                 List<Table> tables = new ArrayList<>();
                 if (this.before != s) {
                     // TODO Add onFailureListener
@@ -134,18 +142,33 @@ public class FragmentSetting extends Fragment {
                             Table tempTable = ds.toObject(Table.class);
 
                             // TODO Add onFailureListener
-                            ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(tempTable.getGroup() + "_" + tempTable.getId()).delete();
+                            ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(Objects.requireNonNull(tempTable).getGroup() + "_" + tempTable.getId()).delete();
                         }
 
                         for (int i = 0; i < Integer.parseInt(String.valueOf(s)); i++) {
                             Table table = new Table();
-                            table.setId(String.valueOf(i + 1));
+                            if (10 > (i + 1)) {
+                                table.setId("0" + (i + 1));
+                            } else {
+                                table.setId(String.valueOf(i + 1));
+                            }
+
                             table.setGroup(((MainActivity) requireActivity()).getUser().getGroup());
                             table.setDishList(((MainActivity) requireActivity()).getDishList());
+                            table.setStatus(Code.TableStatus.STAND_BY.value);
+                            table.setCreateTime(System.currentTimeMillis());
+                            table.setUpdateTime(System.currentTimeMillis());
+                            table.setCreateUser(((MainActivity) requireActivity()).getUser().getId());
+                            table.setUpdateUser(((MainActivity) requireActivity()).getUser().getId());
 
                             // TODO Add onFailureListener
                             ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(table.getGroup() + "_" + table.getId()).set(table);
                         }
+
+                        // Release blocking UI and hide progress bar
+                        requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                        requireView().findViewById(R.id.progressBar_setting).setVisibility(View.GONE);
+                        // TODO
                     });
                 }
             }
