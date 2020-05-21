@@ -23,20 +23,24 @@ import android.view.ViewGroup;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.google.gson.Gson;
 import com.shawn.smartrestaurant.R;
 import com.shawn.smartrestaurant.db.entity.Dish;
 import com.shawn.smartrestaurant.ui.main.MainActivity;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 
 /**
- * A simple {@link Fragment} subclass.
- * Use the {@link FragmentDishes#newInstance} factory method to
- * create an instance of this fragment.
+ *
  */
 public class FragmentDishes extends Fragment {
 
@@ -46,16 +50,15 @@ public class FragmentDishes extends Fragment {
     public static final String ARG_TABLE_START_TIME = "tableStartTime";
     public static final String ARG_TABLE_PRICE = "tablePrice";
     public static final String ARG_TABLE_STATUS = "tableStatus";
-    public static final String ARG_TABLE_DISHLIST = "tableDishList";
+    public static final String ARG_TABLE_DISH_LIST = "tableDishList";
 
     private String tableId;
     private String tableStartTime;
     private Double tablePrice;
     private String tableStatus;
-    private List<Dish> tableDishList;
+    private List tableDishList;
 
     public FragmentDishes() {
-        // Required empty public constructor
     }
 
     /**
@@ -66,19 +69,28 @@ public class FragmentDishes extends Fragment {
      * @param tableStartTime Parameter tableStartTime.
      * @param tablePrice     Parameter tablePrice.
      * @param tableStatus    Parameter tableStatus.
+     * @param tableDishList  Parameter tableDishList.
      * @return A new instance of fragment framelayout_nav_dishes.
      */
-    public static FragmentDishes newInstance(String tableId, String tableStartTime, Double tablePrice, String tableStatus) {
-        FragmentDishes fragment = new FragmentDishes();
+    public static FragmentDishes newInstance(String tableId, String tableStartTime, Double tablePrice, String tableStatus, List<Dish> tableDishList) {
+
         Bundle args = new Bundle();
+
         args.putString(ARG_TABLE_ID, tableId);
         args.putString(ARG_TABLE_START_TIME, tableStartTime);
         args.putDouble(ARG_TABLE_PRICE, tablePrice);
         args.putString(ARG_TABLE_STATUS, tableStatus);
+        args.putString(ARG_TABLE_DISH_LIST, new Gson().toJson(tableDishList));
+
+        FragmentDishes fragment = new FragmentDishes();
         fragment.setArguments(args);
+
         return fragment;
     }
 
+    /**
+     *
+     */
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,65 +99,64 @@ public class FragmentDishes extends Fragment {
             this.tableStartTime = getArguments().getString(ARG_TABLE_START_TIME);
             this.tablePrice = getArguments().getDouble(ARG_TABLE_PRICE);
             this.tableStatus = getArguments().getString(ARG_TABLE_STATUS);
+            this.tableDishList = new Gson().fromJson(getArguments().getString(ARG_TABLE_DISH_LIST), List.class);
         }
 
-        ((MainActivity) getActivity()).getActionBarDrawerToggle().setHomeAsUpIndicator(R.drawable.ic_arrow_back_black_24dp);
-        ((MainActivity) getActivity()).getActionBarDrawerToggle().setDrawerIndicatorEnabled(false);
-        ((MainActivity) getActivity()).setCurrentFragment(this);
-//        Objects.requireNonNull(((MainActivity) getActivity()).getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
-//        ActionBarDrawerToggle.Delegate delegate = ((MainActivity) getActivity()).getDrawerToggleDelegate();
-//        Objects.requireNonNull(delegate).setActionBarUpIndicator(getResources().getDrawable(R.drawable.ic_arrow_back_black_24dp, null), R.string.nav_app_bar_navigate_up_description);
-
-//        ActionBar actionbar = ((MainActivity) getActivity()).getSupportActionBar();
-//        NavController navController = ((NavHostFragment) this.getParentFragment()).getNavController();
-//        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(navController.getGraph())
-//                .setDrawerLayout(((MainActivity) getActivity()).getDrawerLayout())
-//                .build();
-//        NavigationUI.setupActionBarWithNavController((MainActivity) getActivity(), navController,appBarConfiguration);
+        ((MainActivity) requireActivity()).getActionBarDrawerToggle().setHomeAsUpIndicator(R.drawable.ic_arrow_back_black_24dp);
+        ((MainActivity) requireActivity()).getActionBarDrawerToggle().setDrawerIndicatorEnabled(false);
+        ((MainActivity) requireActivity()).setCurrentFragment(this);
     }
 
+    /**
+     *
+     */
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.framelayout_nav_dishes, container, false);
-
-        DishesTabLayoutAdapter dishesTabLayoutAdapter = new DishesTabLayoutAdapter(this);
-        ViewPager2 viewPager = view.findViewById(R.id.dishes_tablelayout_pager);
-        viewPager.setAdapter(dishesTabLayoutAdapter);
-
-        TabLayout tabLayout = view.findViewById(R.id.dishes_tablayout);
-        new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
-            switch (position) {
-                case 0:
-                    tab.setText(R.string.dishes_tablayout_dishes);
-                    tab.setIcon(R.drawable.ic_local_dining_black_24dp);
-                    break;
-                case 1:
-                    tab.setText(R.string.dishes_tablayout_mainfood);
-                    tab.setIcon(R.drawable.ic_local_pizza_black_24dp);
-                    break;
-                case 2:
-                    tab.setText(R.string.dishes_tablayout_drink);
-                    tab.setIcon(R.drawable.ic_local_cafe_black_24dp);
-                    break;
-                case 3:
-                    tab.setText(R.string.dishes_tablayout_dessert);
-                    tab.setIcon(R.drawable.ic_cake_black_24dp);
-                    break;
+        Map<String, List<Dish>> dishMap = new HashMap<>();
+        List<String> keyList = new ArrayList<>();
+        for (Object dish : this.tableDishList) {
+            if (0 == dishMap.size() || null == dishMap.get(((Dish) dish).getCategory())) {
+                dishMap.put(((Dish) dish).getCategory(), Collections.singletonList((Dish) dish));
+                keyList.add(((Dish) dish).getCategory());
+            } else {
+                Objects.requireNonNull(dishMap.get(((Dish) dish).getCategory())).add((Dish) dish);
             }
         }
+
+        View view = inflater.inflate(R.layout.framelayout_nav_dishes, container, false);
+        TabLayout tabLayout = view.findViewById(R.id.viewPager2_dishes);
+
+        DishesTabLayoutAdapter dishesTabLayoutAdapter = new DishesTabLayoutAdapter(this);
+        dishesTabLayoutAdapter.setDishMap(dishMap);
+        ViewPager2 viewPager = view.findViewById(R.id.tabLayout_dishes);
+        viewPager.setAdapter(dishesTabLayoutAdapter);
+
+        Collections.sort(keyList);
+        new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
+            tab.setText(keyList.get(position));
+        }
         ).attach();
+
         setHasOptionsMenu(true);
+
         return view;
     }
 
+    /**
+     *
+     */
     @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
+
         inflater.inflate(R.menu.option_menu_dishes_commit, menu);
     }
 
+    /**
+     *
+     */
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.action_placeOrder) {
@@ -154,36 +165,7 @@ public class FragmentDishes extends Fragment {
             NavHostFragment.findNavController(this).navigate(R.id.action_fragment_dishes_to_fragment_commit, bundle);
             return true;
         }
+
         return super.onOptionsItemSelected(item);
     }
-
-//    @Override
-//    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
-//        DishesTabLayoutAdapter dishesTabLayoutAdapter = new DishesTabLayoutAdapter(this);
-//        ViewPager2 viewPager = view.findViewById(R.id.dishes_tablelayout_pager);
-//        viewPager.setAdapter(dishesTabLayoutAdapter);
-//
-//        TabLayout tabLayout = view.findViewById(R.id.dishes_tablayout);
-//        new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
-//            switch (position) {
-//                case 0:
-//                    tab.setText(R.string.dishes_tablayout_dishes);
-//                    tab.setIcon(R.drawable.ic_local_dining_black_24dp);
-//                    break;
-//                case 1:
-//                    tab.setText(R.string.dishes_tablayout_mainfood);
-//                    tab.setIcon(R.drawable.ic_local_pizza_black_24dp);
-//                    break;
-//                case 2:
-//                    tab.setText(R.string.dishes_tablayout_drink);
-//                    tab.setIcon(R.drawable.ic_local_cafe_black_24dp);
-//                    break;
-//                case 3:
-//                    tab.setText(R.string.dishes_tablayout_dessert);
-//                    tab.setIcon(R.drawable.ic_cake_black_24dp);
-//                    break;
-//            }
-//        }
-//        ).attach();
-//    }
 }

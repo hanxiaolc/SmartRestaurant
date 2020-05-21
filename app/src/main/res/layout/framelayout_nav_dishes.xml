@@ -8,12 +8,12 @@
     tools:context=".ui.main.dishes.FragmentDishes">
 
     <com.google.android.material.tabs.TabLayout
-        android:id="@+id/dishes_tablayout"
+        android:id="@+id/tabLayout_dishes"
         android:layout_width="match_parent"
         android:layout_height="56dp" />
 
     <androidx.viewpager2.widget.ViewPager2
-        android:id="@+id/dishes_tablelayout_pager"
+        android:id="@+id/viewPager2_dishes"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="56dp" />

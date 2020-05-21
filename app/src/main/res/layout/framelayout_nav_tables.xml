@@ -4,8 +4,14 @@
     android:id="@+id/fragment_nav_tables"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/design_default_color_background"
     tools:context=".ui.main.tables.FragmentTables">
+
+    <ProgressBar
+        android:id="@+id/progressBar_tables"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/tables_recyclerView"

@@ -1,25 +1,20 @@
 package com.shawn.smartrestaurant.ui.main.tables;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
-import androidx.navigation.NavController;
-import androidx.navigation.fragment.NavHostFragment;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.shawn.smartrestaurant.R;
@@ -27,35 +22,35 @@ import com.shawn.smartrestaurant.db.entity.Table;
 import com.shawn.smartrestaurant.db.firebase.ShawnOrder;
 import com.shawn.smartrestaurant.ui.main.MainActivity;
 
-import org.w3c.dom.Document;
-
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 
 /**
- * A simple {@link Fragment} subclass.
- * Use the {@link FragmentTables#newInstance} factory method to
- * create an instance of this fragment.
+ *
  */
 public class FragmentTables extends Fragment {
 
     //
     private MainActivity activity;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    //
     private static final String ARG_PARAM1 = "param1";
+
+    //
     private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
+    //
     private String mParam1;
+
+    //
     private String mParam2;
 
+    /**
+     *
+     */
     public FragmentTables() {
-        // Required empty public constructor
     }
 
     /**
@@ -82,6 +77,9 @@ public class FragmentTables extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        setHasOptionsMenu(true);
+
         if (null == activity) {
             activity = (MainActivity) getActivity();
         }
@@ -95,6 +93,8 @@ public class FragmentTables extends Fragment {
         if (null == ((MainActivity) getActivity()).getCurrentFragment() && 1 == fragments.size() && fragments.get(0) instanceof FragmentTables) {
             ((MainActivity) getActivity()).setCurrentFragment(fragments.get(0));
         }
+
+
     }
 
     /**
@@ -129,10 +129,58 @@ public class FragmentTables extends Fragment {
 
             int i = 0;
             for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
-                adapter.getTableList().add(ds.toObject(Table.class));
+                Objects.requireNonNull(adapter).getTableList().add(ds.toObject(Table.class));
                 adapter.notifyItemInserted(i);
                 i++;
             }
         });
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+
+        // Inflate add new menu
+        inflater.inflate(R.menu.option_menu_refresh, menu);
+    }
+
+    /**
+     *
+     */
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+
+        if (item.getItemId() == R.id.button_menu_refresh) {
+
+            // Block UI and show progress bar
+            requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            requireView().findViewById(R.id.progressBar_tables).setVisibility(View.VISIBLE);
+
+            // TODO Add onFailureListener
+            ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).whereEqualTo(Table.COLUMN_GROUP, ((MainActivity) requireActivity()).getUser().getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+                RecyclerView recyclerView = requireView().findViewById(R.id.tables_recyclerView);
+                TablesRecyclerViewAdapter adapter = (TablesRecyclerViewAdapter) recyclerView.getAdapter();
+                Objects.requireNonNull(adapter).getTableList().clear();
+                adapter.notifyDataSetChanged();
+
+                int i = 0;
+                for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
+                    adapter.getTableList().add(ds.toObject(Table.class));
+                    adapter.notifyItemInserted(i);
+                    i++;
+                }
+
+                // Release blocking UI and hide progress bar
+                requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                requireView().findViewById(R.id.progressBar_tables).setVisibility(View.GONE);
+            });
+
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }

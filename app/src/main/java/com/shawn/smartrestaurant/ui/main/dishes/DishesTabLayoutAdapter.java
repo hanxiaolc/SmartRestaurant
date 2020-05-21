@@ -6,47 +6,61 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
+import com.google.gson.Gson;
+import com.shawn.smartrestaurant.db.entity.Dish;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+/**
+ *
+ */
 public class DishesTabLayoutAdapter extends FragmentStateAdapter {
 
-    private String[] dataSet1 = {"a1", "a2", "a3", "a4", "a5", "a1", "a2", "a3", "a4", "a5", "a1", "a2", "a3", "a4", "a5"};
-    private String[] dataSet2 = {"b1", "b2", "b3", "b4", "b5", "b1", "b2", "b3", "b4", "b5", "b1", "b2", "b3", "b4", "b5"};
-    private String[] dataSet3 = {"c1", "c2", "c3", "c4", "c5", "c1", "c2", "c3", "c4", "c5", "c1", "c2", "c3", "c4", "c5"};
-    private String[] dataSet4 = {"d1", "d2", "d3", "d4", "d5", "d1", "d2", "d3", "d4", "d5", "d1", "d2", "d3", "d4", "d5"};
+    //
+    private Map<String, List<Dish>> dishMap;
 
+
+    /**
+     *
+     */
     DishesTabLayoutAdapter(@NonNull Fragment fragment) {
         super(fragment);
     }
 
+    /**
+     *
+     */
     @NonNull
     @Override
     public Fragment createFragment(int position) {
-        Fragment fragment = new DishesCategoryFragment();
-        Bundle args = new Bundle();
+        List<String> keyList = new ArrayList<>(dishMap.keySet());
+        Collections.sort(keyList);
 
-        switch (position) {
-            case 0:
-                args.putStringArray(DishesCategoryFragment.PARAM_CATEGORY, dataSet1);
-                fragment.setArguments(args);
-                break;
-            case 1:
-                args.putStringArray(DishesCategoryFragment.PARAM_CATEGORY, dataSet2);
-                fragment.setArguments(args);
-                break;
-            case 2:
-                args.putStringArray(DishesCategoryFragment.PARAM_CATEGORY, dataSet3);
-                fragment.setArguments(args);
-                break;
-            case 3:
-                args.putStringArray(DishesCategoryFragment.PARAM_CATEGORY, dataSet4);
-                fragment.setArguments(args);
-                break;
-        }
-
-        return fragment;
+        return DishesCategoryFragment.newInstance(new Gson().toJson(this.dishMap.get(keyList.get(position))));
     }
 
+    /**
+     *
+     */
     @Override
     public int getItemCount() {
-        return 4;
+        return dishMap.size();
+    }
+
+    /**
+     *
+     */
+    public Map<String, List<Dish>> getDishMap() {
+        return dishMap;
+    }
+
+    /**
+     *
+     */
+    public void setDishMap(Map<String, List<Dish>> dishMap) {
+        this.dishMap = dishMap;
     }
 }

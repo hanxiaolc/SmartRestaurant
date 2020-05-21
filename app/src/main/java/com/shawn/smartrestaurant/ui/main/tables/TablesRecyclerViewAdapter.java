@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.gson.Gson;
 import com.shawn.smartrestaurant.R;
 import com.shawn.smartrestaurant.db.entity.Table;
 import com.shawn.smartrestaurant.ui.main.dishes.FragmentDishes;
@@ -29,6 +30,13 @@ public class TablesRecyclerViewAdapter extends RecyclerView.Adapter {
     /**
      *
      */
+    TablesRecyclerViewAdapter(List<Table> tableList) {
+        this.tableList = tableList;
+    }
+
+    /**
+     *
+     */
     public static class TablesRecyclerViewAdapterViewHolder extends RecyclerView.ViewHolder {
 
         View view;
@@ -37,13 +45,6 @@ public class TablesRecyclerViewAdapter extends RecyclerView.Adapter {
             super(view);
             this.view = view;
         }
-    }
-
-    /**
-     *
-     */
-    public TablesRecyclerViewAdapter(List<Table> tableList) {
-        this.tableList = tableList;
     }
 
     /**
@@ -59,13 +60,14 @@ public class TablesRecyclerViewAdapter extends RecyclerView.Adapter {
     /**
      *
      */
-    @SuppressLint("SimpleDateFormat")
+    @SuppressLint({"SimpleDateFormat", "SetTextI18n"})
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         Table table = this.tableList.get(position);
 
         TextView id = holder.itemView.findViewById(R.id.textView_table_id);
-        TextView time = holder.itemView.findViewById(R.id.linearLayout_table_time);
+        View timeLayout = holder.itemView.findViewById(R.id.linearLayout_table_time);
+        View priceLayout = holder.itemView.findViewById(R.id.linearLayout_table_price);
         TextView startTime = holder.itemView.findViewById(R.id.textView_table_start_time);
         TextView price = holder.itemView.findViewById(R.id.textView_table_price);
         TextView status = holder.itemView.findViewById(R.id.textView_table_status);
@@ -74,27 +76,30 @@ public class TablesRecyclerViewAdapter extends RecyclerView.Adapter {
         status.setText(table.getStatus());
 
         if (null == table.getStartTime() && null == table.getPrice()) {
-            time.setVisibility(View.GONE);
-            price.setVisibility(View.GONE);
+            timeLayout.setVisibility(View.GONE);
+            priceLayout.setVisibility(View.GONE);
         } else {
-            startTime.setText(new SimpleDateFormat("HH:mm").format(table.getStartTime()));
-            price.setText("$" + table.getPrice());
+            startTime.setText("　" + new SimpleDateFormat("HH:mm").format(table.getStartTime()));
+            price.setText("　$" + table.getPrice());
         }
 
         holder.itemView.setOnClickListener(view -> {
+
             Bundle bundle = new Bundle();
 
             bundle.putString(FragmentDishes.ARG_TABLE_ID, table.getId());
             bundle.putString(FragmentDishes.ARG_TABLE_STATUS, table.getStatus());
-            if (null != table.getStartTime()) {
-                bundle.getLong(FragmentDishes.ARG_TABLE_START_TIME, table.getStartTime().getTime());
-            }
-            if (null != table.getPrice()) {
-                bundle.putDouble(FragmentDishes.ARG_TABLE_PRICE, table.getPrice());
-            }
+            bundle.putString(FragmentDishes.ARG_TABLE_DISH_LIST, new Gson().toJson(table.getDishList()));
+            bundle.getLong(FragmentDishes.ARG_TABLE_START_TIME, table.getStartTime().getTime());
+            bundle.putDouble(FragmentDishes.ARG_TABLE_PRICE, table.getPrice());
 
-            Navigation.findNavController(view)
-                    .navigate(R.id.action_fragment_tables_to_fragment_dishes, bundle);
+            if (null != table.getStartTime() && null != table.getPrice()) {
+                Navigation.findNavController(view)
+                        .navigate(R.id.action_fragment_tables_to_fragment_commit, bundle);
+            } else {
+                Navigation.findNavController(view)
+                        .navigate(R.id.action_fragment_tables_to_fragment_dishes, bundle);
+            }
         });
     }
 

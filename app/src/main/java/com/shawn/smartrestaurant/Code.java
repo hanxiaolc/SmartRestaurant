@@ -9,7 +9,7 @@ public class Code {
     public static final String INITIAL_DISH_ID = "10000000";
 
     //
-    public static final int MAX_NUMBER_OF_TABLES = 15;
+    public static final int MAX_NUMBER_OF_TABLES = 10;
 
     //
     private static final long ONE_MEGABYTE = 1024 * 1024 * 10;

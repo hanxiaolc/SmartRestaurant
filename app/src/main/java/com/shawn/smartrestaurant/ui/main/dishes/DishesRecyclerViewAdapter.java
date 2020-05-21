@@ -10,26 +10,42 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.shawn.smartrestaurant.R;
+import com.shawn.smartrestaurant.db.entity.Dish;
+
+import java.util.List;
 
 public class DishesRecyclerViewAdapter extends RecyclerView.Adapter {
 
-    private String[] dataSet;
+    //
+    private List<Dish> dishList;
 
-    DishesRecyclerViewAdapter(String... dataSet) {
-        super();
-        this.dataSet = dataSet;
+    /**
+     *
+     */
+    DishesRecyclerViewAdapter(List<Dish> dishList) {
+        this.dishList = dishList;
     }
 
+    /**
+     *
+     */
     public static class DishesRecyclerViewAdapterViewHolder extends RecyclerView.ViewHolder {
 
+        //
         View view;
 
+        /**
+         *
+         */
         DishesRecyclerViewAdapterViewHolder(View view) {
             super(view);
             this.view = view;
         }
     }
 
+    /**
+     *
+     */
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -37,24 +53,38 @@ public class DishesRecyclerViewAdapter extends RecyclerView.Adapter {
         return new DishesRecyclerViewAdapterViewHolder(dishesItemView);
     }
 
+    /**
+     *
+     */
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        String item = dataSet[position];
+        Dish dish = this.dishList.get(position);
+
         TextView textView = holder.itemView.findViewById(R.id.dishes_itemView_textView);
         ImageView imageView = holder.itemView.findViewById(R.id.dishes_itemView_imageView);
-        textView.setText(item);
+        textView.setText(dish.getDishName());
         imageView.setImageResource(R.drawable.ic_people_black_24dp);
-//        holder.itemView.setOnClickListener(view -> {
-//            String text = ((TextView) view.findViewById(R.id.tables_itemView_textView)).getText().toString();
-//            Bundle bundle = new Bundle();
-//            bundle.putString("amount", text);
-//            Navigation.findNavController(view)
-//                    .navigate(R.id.action_fragment_tables_to_fragment_dishes, bundle);
-//        });
     }
 
+    /**
+     *
+     */
     @Override
     public int getItemCount() {
-        return dataSet.length;
+        return dishList.size();
+    }
+
+    /**
+     *
+     */
+    public List<Dish> getDishList() {
+        return dishList;
+    }
+
+    /**
+     *
+     */
+    public void setDishList(List<Dish> dishList) {
+        this.dishList = dishList;
     }
 }
