@@ -23,7 +23,9 @@ import com.shawn.smartrestaurant.db.firebase.ShawnOrder;
 import com.shawn.smartrestaurant.ui.main.MainActivity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 
@@ -46,6 +48,7 @@ public class FragmentTables extends Fragment {
 
     //
     private String mParam2;
+
 
     /**
      *
@@ -80,9 +83,6 @@ public class FragmentTables extends Fragment {
 
         setHasOptionsMenu(true);
 
-        if (null == activity) {
-            activity = (MainActivity) getActivity();
-        }
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
@@ -93,8 +93,6 @@ public class FragmentTables extends Fragment {
         if (null == ((MainActivity) getActivity()).getCurrentFragment() && 1 == fragments.size() && fragments.get(0) instanceof FragmentTables) {
             ((MainActivity) getActivity()).setCurrentFragment(fragments.get(0));
         }
-
-
     }
 
     /**
@@ -123,17 +121,33 @@ public class FragmentTables extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
 
-        ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).whereEqualTo(Table.COLUMN_GROUP, ((MainActivity) requireActivity()).getUser().getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
-            RecyclerView recyclerView = view.findViewById(R.id.tables_recyclerView);
-            TablesRecyclerViewAdapter adapter = (TablesRecyclerViewAdapter) recyclerView.getAdapter();
+        RecyclerView recyclerView = view.findViewById(R.id.tables_recyclerView);
+        TablesRecyclerViewAdapter adapter = (TablesRecyclerViewAdapter) recyclerView.getAdapter();
 
-            int i = 0;
-            for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
-                Objects.requireNonNull(adapter).getTableList().add(ds.toObject(Table.class));
-                adapter.notifyItemInserted(i);
-                i++;
+        if (null == ((MainActivity) requireActivity()).getTableMap()) {
+            ((MainActivity) requireActivity()).setTableMap(new HashMap<>());
+
+            ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).whereEqualTo(Table.COLUMN_GROUP, ((MainActivity) requireActivity()).getUser().getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+                int i = 0;
+                for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
+                    Table table = ds.toObject(Table.class);
+                    ((MainActivity) requireActivity()).getTableMap().put(Objects.requireNonNull(table).getId(), table);
+
+                    Objects.requireNonNull(adapter).getTableList().add(table);
+                    adapter.notifyItemInserted(i);
+                    i++;
+                }
+            });
+        } else {
+            if (null == Objects.requireNonNull(adapter).getTableList() || 0 == adapter.getTableList().size()) {
+                int i = 0;
+                for (Map.Entry entry : ((MainActivity) requireActivity()).getTableMap().entrySet()) {
+                    Objects.requireNonNull(adapter).getTableList().add((Table) entry.getValue());
+                    adapter.notifyItemInserted(i);
+                    i++;
+                }
             }
-        });
+        }
     }
 
     /**
@@ -143,7 +157,6 @@ public class FragmentTables extends Fragment {
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
 
-        // Inflate add new menu
         inflater.inflate(R.menu.option_menu_refresh, menu);
     }
 
@@ -159,6 +172,8 @@ public class FragmentTables extends Fragment {
             requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             requireView().findViewById(R.id.progressBar_tables).setVisibility(View.VISIBLE);
 
+            ((MainActivity) requireActivity()).setTableMap(new HashMap<>());
+
             // TODO Add onFailureListener
             ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).whereEqualTo(Table.COLUMN_GROUP, ((MainActivity) requireActivity()).getUser().getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
                 RecyclerView recyclerView = requireView().findViewById(R.id.tables_recyclerView);
@@ -168,6 +183,9 @@ public class FragmentTables extends Fragment {
 
                 int i = 0;
                 for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
+                    Table table = ds.toObject(Table.class);
+                    ((MainActivity) requireActivity()).getTableMap().put(Objects.requireNonNull(table).getId(), table);
+
                     adapter.getTableList().add(ds.toObject(Table.class));
                     adapter.notifyItemInserted(i);
                     i++;

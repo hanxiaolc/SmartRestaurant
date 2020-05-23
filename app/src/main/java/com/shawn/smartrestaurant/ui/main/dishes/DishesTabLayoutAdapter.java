@@ -1,18 +1,16 @@
 package com.shawn.smartrestaurant.ui.main.dishes;
 
-import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
-import com.google.gson.Gson;
 import com.shawn.smartrestaurant.db.entity.Dish;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  *
@@ -20,7 +18,7 @@ import java.util.Map;
 public class DishesTabLayoutAdapter extends FragmentStateAdapter {
 
     //
-    private Map<String, List<Dish>> dishMap;
+    private Map<String, List<Dish>> dishCategoryMap;
 
 
     /**
@@ -36,10 +34,12 @@ public class DishesTabLayoutAdapter extends FragmentStateAdapter {
     @NonNull
     @Override
     public Fragment createFragment(int position) {
-        List<String> keyList = new ArrayList<>(dishMap.keySet());
+        List<String> keyList = new ArrayList<>(dishCategoryMap.keySet());
         Collections.sort(keyList);
+        Collections.sort(Objects.requireNonNull(this.dishCategoryMap.get(keyList.get(position))), (o1, o2) -> o1.getDishCode().compareTo(o2.getDishCode()));
 
-        return DishesCategoryFragment.newInstance(new Gson().toJson(this.dishMap.get(keyList.get(position))));
+        return new DishesCategoryFragment(this.dishCategoryMap.get(keyList.get(position)));
+        //return DishesCategoryFragment.newInstance(new Gson().toJson(this.dishMap.get(keyList.get(position))));
     }
 
     /**
@@ -47,20 +47,20 @@ public class DishesTabLayoutAdapter extends FragmentStateAdapter {
      */
     @Override
     public int getItemCount() {
-        return dishMap.size();
+        return dishCategoryMap.size();
     }
 
     /**
      *
      */
-    public Map<String, List<Dish>> getDishMap() {
-        return dishMap;
+    public Map<String, List<Dish>> getDishCategoryMap() {
+        return dishCategoryMap;
     }
 
     /**
      *
      */
-    public void setDishMap(Map<String, List<Dish>> dishMap) {
-        this.dishMap = dishMap;
+    public void setDishCategoryMap(Map<String, List<Dish>> dishCategoryMap) {
+        this.dishCategoryMap = dishCategoryMap;
     }
 }

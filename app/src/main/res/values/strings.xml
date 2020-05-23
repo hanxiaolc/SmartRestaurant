@@ -29,6 +29,7 @@
     <string name="drawer_other">OTHER</string>
     <string name="button_add">ADD</string>
     <string name="button_refresh">REFRESH</string>
+    <string name="button_dishes_down">DONE</string>
     <string name="drawer_header_website">shawn.com</string>
     <string name="nav_app_bar_open_drawer_description">Open navigation drawer</string>
     <string name="nav_app_bar_close_drawer_description">Close navigation drawer</string>
@@ -50,4 +51,6 @@
     <string name="textView_tables_start_time_description">Start:</string>
     <!--    <string name="textView_tables_end_time_description">End:</string>-->
     <string name="textView_tables_price_description">Total:</string>
+    <string name="imageButton_dishes_subtract_description">Subtract dish number</string>
+    <string name="imageButton_dishes_add_description">Add dish number</string>
 </resources>

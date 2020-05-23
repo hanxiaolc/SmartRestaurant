@@ -84,16 +84,16 @@ public class TablesRecyclerViewAdapter extends RecyclerView.Adapter {
         }
 
         holder.itemView.setOnClickListener(view -> {
-
             Bundle bundle = new Bundle();
 
             bundle.putString(FragmentDishes.ARG_TABLE_ID, table.getId());
             bundle.putString(FragmentDishes.ARG_TABLE_STATUS, table.getStatus());
             bundle.putString(FragmentDishes.ARG_TABLE_DISH_LIST, new Gson().toJson(table.getDishList()));
-            bundle.getLong(FragmentDishes.ARG_TABLE_START_TIME, table.getStartTime().getTime());
-            bundle.putDouble(FragmentDishes.ARG_TABLE_PRICE, table.getPrice());
-
-            if (null != table.getStartTime() && null != table.getPrice()) {
+            if (null != table.getStartTime()) {
+                bundle.putLong(FragmentDishes.ARG_TABLE_START_TIME, table.getStartTime().getTime());
+            }
+            if (null != table.getPrice()) {
+                bundle.putDouble(FragmentDishes.ARG_TABLE_PRICE, table.getPrice());
                 Navigation.findNavController(view)
                         .navigate(R.id.action_fragment_tables_to_fragment_commit, bundle);
             } else {

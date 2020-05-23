@@ -2,8 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_placeOrder"
-        android:title="Place"
+        android:id="@+id/action_dishes_order_done"
+        android:icon="@drawable/ic_done_black_24dp"
+        android:title="@string/button_dishes_down"
         android:visible="true"
         app:showAsAction="always" />
 </menu>

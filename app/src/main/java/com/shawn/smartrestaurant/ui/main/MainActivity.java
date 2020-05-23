@@ -3,10 +3,7 @@ package com.shawn.smartrestaurant.ui.main;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
@@ -18,13 +15,9 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.shawn.smartrestaurant.Code;
@@ -37,7 +30,7 @@ import com.shawn.smartrestaurant.db.entity.User;
 import com.shawn.smartrestaurant.db.firebase.ShawnOrder;
 import com.shawn.smartrestaurant.ui.login.LoginActivity;
 import com.shawn.smartrestaurant.ui.main.addmenu.FragmentAddMenu;
-import com.shawn.smartrestaurant.ui.main.commit.FragmentCommit;
+import com.shawn.smartrestaurant.ui.main.done.FragmentOrderDone;
 import com.shawn.smartrestaurant.ui.main.dishes.FragmentDishes;
 import com.shawn.smartrestaurant.ui.main.setting.FragmentSetting;
 
@@ -47,9 +40,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  *
@@ -105,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
     private Other other;
 
     //
-    private List<Table> tableList;
+    private Map<String, Table> tableMap;
 
 
     /**
@@ -165,9 +155,8 @@ public class MainActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
 
         // Get Tables information
-        db.collection(ShawnOrder.COLLECTION_TABLES).whereEqualTo(Table.COLUMN_GROUP, user.getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
-
-        });
+//        db.collection(ShawnOrder.COLLECTION_TABLES).whereEqualTo(Table.COLUMN_GROUP, user.getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+//        });
 
         // Get extra information
         db.collection(ShawnOrder.COLLECTION_OTHERS).whereEqualTo(Other.COLUMN_GROUP, user.getGroup()).limit(1).get().addOnSuccessListener(queryDocumentSnapshots -> {
@@ -265,7 +254,7 @@ public class MainActivity extends AppCompatActivity {
                 this.actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
             }
 
-            if (this.currentFragment instanceof FragmentCommit) {
+            if (this.currentFragment instanceof FragmentOrderDone) {
                 this.tablesNavHostFragment.getNavController().navigate(R.id.action_fragment_commit_to_fragment_dishes, new Bundle());
             }
 
@@ -576,14 +565,14 @@ public class MainActivity extends AppCompatActivity {
     /**
      *
      */
-    public List<Table> getTableList() {
-        return tableList;
+    public Map<String, Table> getTableMap() {
+        return tableMap;
     }
 
     /**
      *
      */
-    public void setTableList(List<Table> tableList) {
-        this.tableList = tableList;
+    public void setTableMap(Map<String, Table> tableMap) {
+        this.tableMap = tableMap;
     }
 }

@@ -31,9 +31,9 @@
     </fragment>
     <fragment
         android:id="@+id/fragment_commit"
-        android:name="com.shawn.smartrestaurant.ui.main.commit.FragmentCommit"
+        android:name="com.shawn.smartrestaurant.ui.main.done.FragmentOrderDone"
         android:label="fragment_commit"
-        tools:layout="@layout/fragment_commit">
+        tools:layout="@layout/framelayout_nav_order_done">
         <action
             android:id="@+id/action_fragment_commit_to_fragment_tables"
             app:destination="@id/fragment_tables" />

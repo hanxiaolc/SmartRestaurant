@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".ui.main.dishes.DishesCategoryFragment"
+    android:id="@+id/category_framelayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/category_framelayout"
-    android:background="@color/cardview_light_background">
+    tools:context=".ui.main.dishes.DishesCategoryFragment">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/category_recyclerView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 </FrameLayout>

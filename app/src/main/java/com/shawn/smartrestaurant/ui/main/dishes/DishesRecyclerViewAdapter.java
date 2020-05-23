@@ -1,9 +1,10 @@
 package com.shawn.smartrestaurant.ui.main.dishes;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -56,14 +57,40 @@ public class DishesRecyclerViewAdapter extends RecyclerView.Adapter {
     /**
      *
      */
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         Dish dish = this.dishList.get(position);
 
-        TextView textView = holder.itemView.findViewById(R.id.dishes_itemView_textView);
-        ImageView imageView = holder.itemView.findViewById(R.id.dishes_itemView_imageView);
-        textView.setText(dish.getDishName());
-        imageView.setImageResource(R.drawable.ic_people_black_24dp);
+        TextView dishCode = holder.itemView.findViewById(R.id.textView_dishes_code);
+        TextView dishName = holder.itemView.findViewById(R.id.textView_dishes_name);
+        TextView dishPrice = holder.itemView.findViewById(R.id.textView_dishes_price);
+        TextView dishNumber = holder.itemView.findViewById(R.id.textView_dishes_number);
+        ImageButton subtractButton = holder.itemView.findViewById(R.id.imageButton_dishes_subtract);
+        ImageButton addButton = holder.itemView.findViewById(R.id.imageButton_dishes_add);
+
+        dishCode.setText(dish.getDishCode());
+        dishName.setText(dish.getDishName());
+        dishPrice.setText("$ " + dish.getPrice());
+        dishNumber.setText(String.valueOf(dish.getNumbers()));
+
+        addButton.setOnClickListener(v -> {
+            int number = Integer.parseInt(dishNumber.getText().toString());
+            if (99 <= number) {
+                return;
+            }
+            dish.setNumbers(number + 1);
+            dishNumber.setText(String.valueOf(dish.getNumbers()));
+        });
+
+        subtractButton.setOnClickListener(v -> {
+            int number = Integer.parseInt(dishNumber.getText().toString());
+            if (0 >= number) {
+                return;
+            }
+            dish.setNumbers(number - 1);
+            dishNumber.setText(String.valueOf(dish.getNumbers()));
+        });
     }
 
     /**
