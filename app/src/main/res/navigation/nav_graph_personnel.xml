@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph_personnel"
+    app:startDestination="@id/framelayout_nav_personnel_members">
+
+    <fragment
+        android:id="@+id/framelayout_nav_personnel_members"
+        android:name="com.shawn.smartrestaurant.ui.main.personnel.members.FragmentPersonnelMembers"
+        android:label="framelayout_nav_personnel_members"
+        tools:layout="@layout/framelayout_nav_personnel_members">
+        <action
+            android:id="@+id/action_framelayout_nav_personnel_members_to_framelayout_nav_personnel_add"
+            app:destination="@id/framelayout_nav_personnel_add" />
+    </fragment>
+    <fragment
+        android:id="@+id/framelayout_nav_personnel_add"
+        android:name="com.shawn.smartrestaurant.ui.main.personnel.add.FragmentPersonnelAdd"
+        android:label="framelayout_nav_personnel_add"
+        tools:layout="@layout/framelayout_nav_personnel_add">
+        <action
+            android:id="@+id/action_framelayout_nav_personnel_add_to_framelayout_nav_personnel_members"
+            app:destination="@id/framelayout_nav_personnel_members" />
+    </fragment>
+</navigation>

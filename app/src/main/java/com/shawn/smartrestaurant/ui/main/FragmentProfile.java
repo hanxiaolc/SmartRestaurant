@@ -25,12 +25,12 @@ public class FragmentProfile extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_drawer_profile, container, false);
+        return inflater.inflate(R.layout.recyclerview_item_history_tables, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        view.findViewById(R.id.button_delete).setOnClickListener(v -> {
+        view.findViewById(R.id.button_personnel_add_update).setOnClickListener(v -> {
 
             MainActivity mainActivity = (MainActivity) getActivity();
 

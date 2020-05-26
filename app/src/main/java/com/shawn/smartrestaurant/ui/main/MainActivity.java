@@ -20,6 +20,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.gson.Gson;
 import com.shawn.smartrestaurant.Code;
 import com.shawn.smartrestaurant.R;
 import com.shawn.smartrestaurant.db.AppDatabase;
@@ -32,6 +33,8 @@ import com.shawn.smartrestaurant.ui.login.LoginActivity;
 import com.shawn.smartrestaurant.ui.main.addmenu.FragmentAddMenu;
 import com.shawn.smartrestaurant.ui.main.done.FragmentOrderDone;
 import com.shawn.smartrestaurant.ui.main.dishes.FragmentDishes;
+import com.shawn.smartrestaurant.ui.main.history.done.FragmentHistoryOrderDone;
+import com.shawn.smartrestaurant.ui.main.personnel.add.FragmentPersonnelAdd;
 import com.shawn.smartrestaurant.ui.main.setting.FragmentSetting;
 
 import java.io.File;
@@ -50,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private AppDatabase localDb;
 
     //
-    FirebaseFirestore db;
+    private FirebaseFirestore db;
 
     //
     private User user;
@@ -60,6 +63,12 @@ public class MainActivity extends AppCompatActivity {
 
     //
     private NavHostFragment menuNavHostFragment;
+
+    //
+    private NavHostFragment historyTablesNavHostFragment;
+
+    //
+    private NavHostFragment personnelNavHostFragment;
 
     //
     private MenuItem currentMenuItem;
@@ -97,6 +106,15 @@ public class MainActivity extends AppCompatActivity {
     //
     private Map<String, Table> tableMap;
 
+    //
+    private List<Table> historyTableList;
+
+    //
+    private boolean personnelChanged;
+
+    //
+    private List<User> memberList;
+
 
     /**
      *
@@ -133,6 +151,8 @@ public class MainActivity extends AppCompatActivity {
         TextView drawerHeadUserId = this.drawerNavigationView.getHeaderView(0).findViewById(R.id.drawer_head_name);
         this.tablesNavHostFragment = NavHostFragment.create(R.navigation.nav_graph);
         this.menuNavHostFragment = NavHostFragment.create(R.navigation.nav_graph_menu_setting);
+        this.historyTablesNavHostFragment = NavHostFragment.create(R.navigation.nav_graph_history);
+        this.personnelNavHostFragment = NavHostFragment.create(R.navigation.nav_graph_personnel);
 
         this.localDb = AppDatabase.getInstance(getApplicationContext());
         List<User> users = this.localDb.userDao().findAll();
@@ -197,25 +217,22 @@ public class MainActivity extends AppCompatActivity {
                     item.setChecked(true);
                     switch (item.getItemId()) {
                         case R.id.fragment_drawer_tables:
-//                            NavigationUI.setupWithNavController(toolbar, navController);
                             getSupportFragmentManager().beginTransaction().replace(R.id.fragmentLayout_main, this.tablesNavHostFragment).commit();
-//                            getSupportFragmentManager().beginTransaction().add(R.id.fragmentLayout_main, FragmentTables.class, new Bundle()).commit();
-//                            replaceFragment(new FragmentTables());
-////                            currentFragmentTitle = "PROFILE";
                             break;
                         case R.id.fragment_drawer_menu:
                             getSupportFragmentManager().beginTransaction().replace(R.id.fragmentLayout_main, this.menuNavHostFragment).commit();
                             break;
-                        case R.id.fragment_drawer_profile:
-                            getSupportFragmentManager().beginTransaction().replace(R.id.fragmentLayout_main, FragmentProfile.class, new Bundle()).addToBackStack("FragmentTables").commit();
-                            //replaceFragment(new FragmentProfile());
-////                            currentFragmentTitle = "PROFILE";
+                        case R.id.fragment_drawer_personnel:
+                            getSupportFragmentManager().beginTransaction().replace(R.id.fragmentLayout_main, this.personnelNavHostFragment).commit();
                             break;
                         case R.id.fragment_drawer_setting:
                             getSupportFragmentManager().beginTransaction().replace(R.id.fragmentLayout_main, FragmentSetting.class, new Bundle()).commit();
                             break;
+                        case R.id.fragment_drawer_history:
+                            getSupportFragmentManager().beginTransaction().replace(R.id.fragmentLayout_main, this.historyTablesNavHostFragment).commit();
+                            break;
                         default:
-////                            drawerMenuIndex = 0;
+                            //getSupportFragmentManager().beginTransaction().replace(R.id.fragmentLayout_main, this.tablesNavHostFragment).commit();
                     }
                     this.drawerLayout.closeDrawers();
                     return true;
@@ -255,7 +272,23 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if (this.currentFragment instanceof FragmentOrderDone) {
-                this.tablesNavHostFragment.getNavController().navigate(R.id.action_fragment_commit_to_fragment_dishes, new Bundle());
+                Bundle bundle = new Bundle();
+                bundle.putString(FragmentDishes.ARG_TABLE, new Gson().toJson(((FragmentOrderDone) currentFragment).getTable()));
+
+                this.tablesNavHostFragment.getNavController().navigate(R.id.action_fragment_commit_to_fragment_dishes, bundle);
+            }
+
+            if (this.currentFragment instanceof FragmentPersonnelAdd) {
+                this.personnelNavHostFragment.getNavController().navigate(R.id.action_framelayout_nav_personnel_add_to_framelayout_nav_personnel_members, new Bundle());
+                this.actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
+            }
+
+            if (this.currentFragment instanceof FragmentHistoryOrderDone) {
+//                Bundle bundle = new Bundle();
+//                bundle.putString(FragmentDishes.ARG_TABLE, new Gson().toJson(((FragmentOrderDone) currentFragment).getTable()));
+
+                this.historyTablesNavHostFragment.getNavController().navigate(R.id.action_framelayout_nav_history_order_done_to_framelayout_nav_history_tables, new Bundle());
+                this.actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
             }
 
             if (this.currentFragment instanceof FragmentAddMenu) {
@@ -574,5 +607,47 @@ public class MainActivity extends AppCompatActivity {
      */
     public void setTableMap(Map<String, Table> tableMap) {
         this.tableMap = tableMap;
+    }
+
+    /**
+     *
+     */
+    public List<Table> getHistoryTableList() {
+        return historyTableList;
+    }
+
+    /**
+     *
+     */
+    public void setHistoryTableList(List<Table> historyTableList) {
+        this.historyTableList = historyTableList;
+    }
+
+    /**
+     *
+     */
+    public boolean isPersonnelChanged() {
+        return personnelChanged;
+    }
+
+    /**
+     *
+     */
+    public void setPersonnelChanged(boolean personnelChanged) {
+        this.personnelChanged = personnelChanged;
+    }
+
+    /**
+     *
+     */
+    public List<User> getMemberList() {
+        return memberList;
+    }
+
+    /**
+     *
+     */
+    public void setMemberList(List<User> memberList) {
+        this.memberList = memberList;
     }
 }

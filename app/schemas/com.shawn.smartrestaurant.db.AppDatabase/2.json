@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "ea59057a8b3b3fe284341d12c8ae4739",
+    "identityHash": "ea47f4394209946e2004dc6915fa90a0",
     "entities": [
       {
         "tableName": "User",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `password` TEXT, `group` TEXT, `email` TEXT, `isManager` INTEGER NOT NULL, `status` TEXT, `createTime` INTEGER NOT NULL, `updateTime` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `password` TEXT, `group` TEXT, `email` TEXT, `isManager` INTEGER NOT NULL, `status` TEXT, `createTime` INTEGER NOT NULL, `createUser` TEXT, `updateTime` INTEGER NOT NULL, `updateUser` TEXT, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -51,10 +51,22 @@
             "notNull": true
           },
           {
+            "fieldPath": "createUser",
+            "columnName": "createUser",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
             "fieldPath": "updateTime",
             "columnName": "updateTime",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "updateUser",
+            "columnName": "updateUser",
+            "affinity": "TEXT",
+            "notNull": false
           }
         ],
         "primaryKey": {
@@ -162,7 +174,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ea59057a8b3b3fe284341d12c8ae4739')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ea47f4394209946e2004dc6915fa90a0')"
     ]
   }
 }

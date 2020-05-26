@@ -4,7 +4,6 @@ import android.content.Context;
 import android.util.Log;
 
 import androidx.room.Room;
-import androidx.room.RoomDatabase;
 import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 import androidx.test.core.app.ApplicationProvider;
@@ -12,7 +11,6 @@ import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.shawn.smartrestaurant.db.AppDatabase;
-import com.shawn.smartrestaurant.db.entity.Dish;
 import com.shawn.smartrestaurant.db.entity.User;
 import com.shawn.smartrestaurant.db.local.LocalDb;
 
@@ -20,7 +18,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.File;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -33,7 +30,7 @@ import static org.junit.Assert.*;
 @RunWith(AndroidJUnit4.class)
 public class ExampleInstrumentedTest {
     @Test
-    @Ignore
+    @Ignore("Test Method")
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
@@ -42,7 +39,7 @@ public class ExampleInstrumentedTest {
     }
 
     @Test
-    @Ignore
+    @Ignore("Test Method")
     public void testFileDir() {
 
         // Context of the app under test.
@@ -67,7 +64,7 @@ public class ExampleInstrumentedTest {
     }
 
     @Test
-    //@Ignore
+    @Ignore("Test Method")
     public void testSqlite() {
 
         // Context of the app under test.
@@ -85,7 +82,7 @@ public class ExampleInstrumentedTest {
             Log.e("HANXIAO1: ", user.getEmail());
         }
 
-        List<Dish> dishs = localDb.dishDao().findAll();
+//        List<Dish> dishs = localDb.dishDao().findAll();
 
 //        Room.databaseBuilder(
 //                appContext,
@@ -100,7 +97,7 @@ public class ExampleInstrumentedTest {
     }
 
     @Test
-    @Ignore
+    @Ignore("Test Method")
     public void testMigration() {
 
         Migration MIGRATION_1_2 = new Migration(1, 2) {
@@ -119,10 +116,46 @@ public class ExampleInstrumentedTest {
                 LocalDb.DB_NAME).addMigrations(MIGRATION_1_2).build();
 
 
+//        List<User> users = localDb.userDao().findAll();
+//        List<Dish> dishes = localDb.dishDao().findAll();
+//        for (User user : users) {
+//            System.out.println(user.getId());
+//        }
+    }
+
+    @Test
+    @Ignore("Test Method")
+    public void testDestructiveMigration() {
+
+        // Context of the app under test.
+        Context context = ApplicationProvider.getApplicationContext();
+
+        AppDatabase localDb = Room
+                .databaseBuilder(ApplicationProvider.getApplicationContext(), AppDatabase.class, LocalDb.DB_NAME)
+                .allowMainThreadQueries()
+                .fallbackToDestructiveMigration()
+                .build();
+
+
         List<User> users = localDb.userDao().findAll();
-        List<Dish> dishes = localDb.dishDao().findAll();
         for (User user : users) {
             System.out.println(user.getId());
+        }
+    }
+
+    @Test
+    @Ignore("Test Method")
+    public void testUpdateUser() {
+
+        AppDatabase localDb = AppDatabase.getInstance(ApplicationProvider.getApplicationContext());
+        List<User> users = localDb.userDao().findAll();
+
+        for (User user : users) {
+            if (user.getId().equals("user01")) {
+                user.setCreateUser("user01");
+                user.setUpdateUser("user01");
+            }
+            localDb.userDao().updateUser(user);
         }
     }
 }

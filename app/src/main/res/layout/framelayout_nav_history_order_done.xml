@@ -11,15 +11,15 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
         android:orientation="vertical"
-        tools:context=".ui.main.done.FragmentOrderDone">
+        tools:context=".ui.main.history.done.FragmentHistoryOrderDone">
 
         <TableLayout
-            android:id="@+id/tableLayout_order_done"
+            android:id="@+id/tableLayout_history_order_done"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
         <View
-            android:id="@+id/view_order_done_divider"
+            android:id="@+id/view_history_order_done_divider"
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginTop="16dp"
@@ -39,20 +39,10 @@
                 android:textSize="20sp" />
 
             <TextView
-                android:id="@+id/textView_order_done_total_price"
+                android:id="@+id/textView_history_order_done_total_price"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="20sp" />
         </LinearLayout>
-
-        <Button
-            android:id="@+id/button_order_done_cash_up"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="32dp"
-            android:layout_marginBottom="120dp"
-            android:drawableStart="@drawable/ic_attach_money_black_24dp"
-            android:text="@string/button_cash_up" />
     </LinearLayout>
 </ScrollView>

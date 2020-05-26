@@ -60,7 +60,7 @@ public class TablesRecyclerViewAdapter extends RecyclerView.Adapter {
     /**
      *
      */
-    @SuppressLint({"SimpleDateFormat", "SetTextI18n"})
+    @SuppressLint({"SimpleDateFormat", "SetTextI18n", "DefaultLocale"})
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         Table table = this.tableList.get(position);
@@ -79,21 +79,24 @@ public class TablesRecyclerViewAdapter extends RecyclerView.Adapter {
             timeLayout.setVisibility(View.GONE);
             priceLayout.setVisibility(View.GONE);
         } else {
+            timeLayout.setVisibility(View.VISIBLE);
+            priceLayout.setVisibility(View.VISIBLE);
             startTime.setText("　" + new SimpleDateFormat("HH:mm").format(table.getStartTime()));
-            price.setText("　$" + table.getPrice());
+            price.setText("　$" + String.format("%.2f", table.getPrice()));
         }
 
         holder.itemView.setOnClickListener(view -> {
             Bundle bundle = new Bundle();
-
-            bundle.putString(FragmentDishes.ARG_TABLE_ID, table.getId());
-            bundle.putString(FragmentDishes.ARG_TABLE_STATUS, table.getStatus());
-            bundle.putString(FragmentDishes.ARG_TABLE_DISH_LIST, new Gson().toJson(table.getDishList()));
-            if (null != table.getStartTime()) {
-                bundle.putLong(FragmentDishes.ARG_TABLE_START_TIME, table.getStartTime().getTime());
-            }
+            bundle.putString(FragmentDishes.ARG_TABLE, new Gson().toJson(table));
+//
+//            bundle.putString(FragmentDishes.ARG_TABLE_ID, table.getId());
+//            bundle.putString(FragmentDishes.ARG_TABLE_STATUS, table.getStatus());
+//            bundle.putString(FragmentDishes.ARG_TABLE_DISH_LIST, new Gson().toJson(table.getDishList()));
+//            if (null != table.getStartTime()) {
+//                bundle.putLong(FragmentDishes.ARG_TABLE_START_TIME, table.getStartTime().getTime());
+//            }
             if (null != table.getPrice()) {
-                bundle.putDouble(FragmentDishes.ARG_TABLE_PRICE, table.getPrice());
+//                bundle.putDouble(FragmentDishes.ARG_TABLE_PRICE, table.getPrice());
                 Navigation.findNavController(view)
                         .navigate(R.id.action_fragment_tables_to_fragment_commit, bundle);
             } else {

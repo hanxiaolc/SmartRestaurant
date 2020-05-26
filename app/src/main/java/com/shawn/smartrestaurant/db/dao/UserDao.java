@@ -4,6 +4,7 @@ import androidx.room.Dao;
 import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
+import androidx.room.Update;
 
 import com.shawn.smartrestaurant.db.entity.User;
 
@@ -44,4 +45,16 @@ public interface UserDao {
      */
     @Query("DELETE FROM user")
     void deleteAll();
+
+    /**
+     *
+     */
+    @Update
+    public void updateUsers(User... users);
+
+    /**
+     *
+     */
+    @Update
+    public void updateUser(User user);
 }

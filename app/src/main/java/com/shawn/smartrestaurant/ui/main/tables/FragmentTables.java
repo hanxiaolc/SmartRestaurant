@@ -24,8 +24,6 @@ import com.shawn.smartrestaurant.ui.main.MainActivity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 
@@ -89,10 +87,11 @@ public class FragmentTables extends Fragment {
         }
 
         // initial current fragment in activity
-        List<Fragment> fragments = Objects.requireNonNull((MainActivity) getActivity()).getSupportFragmentManager().getFragments().get(0).getChildFragmentManager().getFragments();
-        if (null == ((MainActivity) getActivity()).getCurrentFragment() && 1 == fragments.size() && fragments.get(0) instanceof FragmentTables) {
-            ((MainActivity) getActivity()).setCurrentFragment(fragments.get(0));
-        }
+//        List<Fragment> fragments = Objects.requireNonNull((MainActivity) getActivity()).getSupportFragmentManager().getFragments().get(0).getChildFragmentManager().getFragments();
+//        if (1 == fragments.size() && fragments.get(0) instanceof FragmentTables) {
+//            ((MainActivity) getActivity()).setCurrentFragment(fragments.get(0));
+//        }
+        ((MainActivity) getActivity()).setCurrentFragment(this);
     }
 
     /**
@@ -139,13 +138,15 @@ public class FragmentTables extends Fragment {
                 }
             });
         } else {
-            if (null == Objects.requireNonNull(adapter).getTableList() || 0 == adapter.getTableList().size()) {
-                int i = 0;
-                for (Map.Entry entry : ((MainActivity) requireActivity()).getTableMap().entrySet()) {
-                    Objects.requireNonNull(adapter).getTableList().add((Table) entry.getValue());
-                    adapter.notifyItemInserted(i);
-                    i++;
-                }
+            if (0 == Objects.requireNonNull(adapter).getTableList().size()) {
+//                int i = 0;
+                Objects.requireNonNull(adapter).getTableList().addAll(((MainActivity) requireActivity()).getTableMap().values());
+                adapter.notifyDataSetChanged();
+//                for (Map.Entry entry : ((MainActivity) requireActivity()).getTableMap().entrySet()) {
+//                    Objects.requireNonNull(adapter).getTableList().add((Table) entry.getValue());
+//                    adapter.notifyItemInserted(i);
+//                    i++;
+//                }
             }
         }
     }

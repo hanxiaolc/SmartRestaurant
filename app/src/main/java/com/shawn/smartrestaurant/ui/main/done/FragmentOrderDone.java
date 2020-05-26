@@ -3,20 +3,26 @@ package com.shawn.smartrestaurant.ui.main.done;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.gson.Gson;
+import com.shawn.smartrestaurant.Code;
 import com.shawn.smartrestaurant.R;
 import com.shawn.smartrestaurant.db.entity.Dish;
 import com.shawn.smartrestaurant.db.entity.Table;
+import com.shawn.smartrestaurant.db.firebase.ShawnOrder;
 import com.shawn.smartrestaurant.ui.main.MainActivity;
 
 
@@ -65,10 +71,11 @@ public class FragmentOrderDone extends Fragment {
 
         if (getArguments() != null) {
             this.table = new Gson().fromJson(getArguments().getString(ARG_TABLE), Table.class);
-
-            ((MainActivity) requireActivity()).getTableMap().put(this.table.getId(), this.table);
-            ((MainActivity) requireActivity()).setCurrentFragment(this);
         }
+
+        ((MainActivity) requireActivity()).getActionBarDrawerToggle().setHomeAsUpIndicator(R.drawable.ic_arrow_back_black_24dp);
+        ((MainActivity) requireActivity()).getActionBarDrawerToggle().setDrawerIndicatorEnabled(false);
+        ((MainActivity) requireActivity()).setCurrentFragment(this);
     }
 
     /**
@@ -77,6 +84,7 @@ public class FragmentOrderDone extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
 
         return inflater.inflate(R.layout.framelayout_nav_order_done, container, false);
     }
@@ -88,19 +96,71 @@ public class FragmentOrderDone extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         TableLayout tableLayout = view.findViewById(R.id.tableLayout_order_done);
+        TextView totalPriceTextView = view.findViewById(R.id.textView_order_done_total_price);
+        Button cashUp = view.findViewById(R.id.button_order_done_cash_up);
+
         tableLayout.removeAllViews();
         tableLayout.setStretchAllColumns(true);
         tableLayout.setShrinkAllColumns(true);
-        TextView totalPriceTextView = view.findViewById(R.id.textView_order_done_total_price);
 
-        double totalPrice = 0;
         for (Dish dish : this.table.getDishList()) {
             if (0 != dish.getNumbers()) {
                 tableLayout.addView(this.createTableRow(dish));
-                totalPrice = totalPrice + (dish.getPrice() * dish.getNumbers());
+                tableLayout.addView(this.createTableRowNumber(dish));
             }
         }
-        totalPriceTextView.setText(" $" + String.format("%.2f", totalPrice));
+        totalPriceTextView.setText(" $" + String.format("%.2f", this.table.getPrice()));
+
+        cashUp.setOnClickListener(v -> {
+
+            // Save in database as history
+            long currentTime = System.currentTimeMillis();
+            this.table.setEndTime(currentTime);
+            this.table.setUpdateUser(((MainActivity) requireActivity()).getUser().getId());
+            this.table.setUpdateTime(currentTime);
+
+            ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_HISTORY).document(String.valueOf(currentTime)).set(this.table);
+
+            // Update table status
+            this.table.setStartTime(null);
+            this.table.setPrice(null);
+            this.table.setStatus(Code.TableStatus.STAND_BY.value);
+            for (Dish dish : this.table.getDishList()) {
+                if (0 != dish.getNumbers()) {
+                    dish.setNumbers(0);
+                }
+            }
+            ((MainActivity) requireActivity()).getTableMap().put(this.table.getId(), this.table);
+            ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(table.getGroup() + "_" + table.getId()).set(this.table);
+
+            ((MainActivity) requireActivity()).getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
+
+            NavHostFragment.findNavController(this).navigate(R.id.action_fragment_commit_to_fragment_tables, new Bundle());
+        });
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+
+        inflater.inflate(R.menu.option_menu_home, menu);
+    }
+
+    /**
+     *
+     */
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.button_menu_home) {
+            NavHostFragment.findNavController(this).navigate(R.id.action_fragment_commit_to_fragment_tables, new Bundle());
+            ((MainActivity) requireActivity()).getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -117,7 +177,7 @@ public class FragmentOrderDone extends Fragment {
         TextView code = new TextView(requireContext());
         TextView name = new TextView(requireContext());
         TextView price = new TextView(requireContext());
-        TextView number = new TextView(requireContext());
+//        TextView number = new TextView(requireContext());
 
 //        if (10 > index) {
 //            indexTextView.setText("0" + index);
@@ -127,7 +187,7 @@ public class FragmentOrderDone extends Fragment {
         code.setText(dish.getDishCode());
         name.setText(dish.getDishName());
         price.setText(String.valueOf(dish.getPrice()));
-        number.setText(String.valueOf(dish.getNumbers()));
+//        number.setText(String.valueOf(dish.getNumbers()));
 
 //        indexTextView.setLayoutParams(params);
 //        code.setLayoutParams(params);
@@ -139,9 +199,43 @@ public class FragmentOrderDone extends Fragment {
         tableRow.addView(code);
         tableRow.addView(name);
         tableRow.addView(price);
-        tableRow.addView(number);
-
+//        tableRow.addView(number);
 
         return tableRow;
+    }
+
+    /**
+     *
+     */
+    private TableRow createTableRowNumber(Dish dish) {
+
+        TableRow.LayoutParams layoutParams = new
+                TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT,
+                TableRow.LayoutParams.WRAP_CONTENT);
+        layoutParams.column = 2;
+
+        TableRow tableRow = new TableRow(requireContext());
+        tableRow.setMinimumHeight(24);
+
+        TextView number = new TextView(requireContext());
+        number.setText(String.valueOf(dish.getNumbers()));
+        number.setLayoutParams(layoutParams);
+        tableRow.addView(number);
+
+        return tableRow;
+    }
+
+    /**
+     *
+     */
+    public Table getTable() {
+        return table;
+    }
+
+    /**
+     *
+     */
+    public void setTable(Table table) {
+        this.table = table;
     }
 }

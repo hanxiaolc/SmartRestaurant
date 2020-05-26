@@ -21,6 +21,28 @@ public class Table {
     public static final String COLUMN_GROUP = "group";
 
     //
+    public static final String COLUMN_UPDATE_TIME = "updateTime";
+
+    //
+    public static final String COLUMN_UPDATE_USER = "updateUser";
+
+    //
+    public static final String COLUMN_START_TIME = "startTime";
+
+    //
+    public static final String COLUMN_END_TIME = "endTime";
+
+    //
+    public static final String COLUMN_STATUS = "status";
+
+    //
+    public static final String COLUMN_PRICE = "price";
+
+    //
+    public static final String COLUMN_DISH_LIST = "dishList";
+
+
+    //
     @NonNull
     @PrimaryKey
     private String id = "";
@@ -39,11 +61,11 @@ public class Table {
 
     //
     @ColumnInfo
-    private Date startTime;
+    private Long startTime;
 
     //
     @ColumnInfo
-    private Date endTime;
+    private Long endTime;
 
     //
     @ColumnInfo
@@ -125,28 +147,28 @@ public class Table {
     /**
      *
      */
-    public Date getStartTime() {
+    public Long getStartTime() {
         return startTime;
     }
 
     /**
      *
      */
-    public void setStartTime(Date startTime) {
+    public void setStartTime(Long startTime) {
         this.startTime = startTime;
     }
 
     /**
      *
      */
-    public Date getEndTime() {
+    public Long getEndTime() {
         return endTime;
     }
 
     /**
      *
      */
-    public void setEndTime(Date endTime) {
+    public void setEndTime(Long endTime) {
         this.endTime = endTime;
     }
 

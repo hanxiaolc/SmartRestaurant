@@ -46,7 +46,15 @@ public class User {
 
     //
     @ColumnInfo
+    private String createUser;
+
+    //
+    @ColumnInfo
     private long updateTime;
+
+    //
+    @ColumnInfo
+    private String updateUser;
 
     /**
      *
@@ -228,5 +236,33 @@ public class User {
      */
     public void setUpdateTime(long updateTime) {
         this.updateTime = updateTime;
+    }
+
+    /**
+     *
+     */
+    public String getCreateUser() {
+        return createUser;
+    }
+
+    /**
+     *
+     */
+    public void setCreateUser(String createUser) {
+        this.createUser = createUser;
+    }
+
+    /**
+     *
+     */
+    public String getUpdateUser() {
+        return updateUser;
+    }
+
+    /**
+     *
+     */
+    public void setUpdateUser(String updateUser) {
+        this.updateUser = updateUser;
     }
 }

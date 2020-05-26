@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph_history"
+    app:startDestination="@id/framelayout_nav_history_tables">
+
+    <fragment
+        android:id="@+id/framelayout_nav_history_tables"
+        android:name="com.shawn.smartrestaurant.ui.main.history.tables.FragmentHistoryTables"
+        android:label="framelayout_nav_history_tables"
+        tools:layout="@layout/framelayout_nav_history_tables">
+        <action
+            android:id="@+id/action_framelayout_nav_history_tables_to_framelayout_nav_history_order_done"
+            app:destination="@id/framelayout_nav_history_order_done" />
+    </fragment>
+    <fragment
+        android:id="@+id/framelayout_nav_history_order_done"
+        android:name="com.shawn.smartrestaurant.ui.main.history.done.FragmentHistoryOrderDone"
+        android:label="framelayout_nav_history_order_done"
+        tools:layout="@layout/framelayout_nav_history_order_done">
+        <action
+            android:id="@+id/action_framelayout_nav_history_order_done_to_framelayout_nav_history_tables"
+            app:destination="@id/framelayout_nav_history_tables" />
+    </fragment>
+</navigation>
