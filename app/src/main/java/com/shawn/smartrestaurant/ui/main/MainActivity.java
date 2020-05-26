@@ -80,9 +80,6 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout drawerLayout;
 
     //
-    private NavigationView drawerNavigationView;
-
-    //
     private ActionBarDrawerToggle actionBarDrawerToggle;
 
     //
@@ -138,17 +135,19 @@ public class MainActivity extends AppCompatActivity {
         this.drawerLayout.addDrawerListener(this.actionBarDrawerToggle);
 
         // Set drawer navigation view
-        this.drawerNavigationView = findViewById(R.id.nav_view);
+        //
+        NavigationView drawerNavigationView = findViewById(R.id.nav_view);
+
         // TODO
         // this.drawerNavigationView.getMenu().getItem(3).setActionView(R.layout.action_reminder_dot);
-        setUpDrawerMenu(this.drawerNavigationView);
+        setUpDrawerMenu(drawerNavigationView);
 
         if (null == this.currentMenuItem) {
-            this.currentMenuItem = this.drawerNavigationView.getMenu().getItem(0);
+            this.currentMenuItem = drawerNavigationView.getMenu().getItem(0);
             this.currentMenuItem.setChecked(true);
         }
 
-        TextView drawerHeadUserId = this.drawerNavigationView.getHeaderView(0).findViewById(R.id.drawer_head_name);
+        TextView drawerHeadUserId = drawerNavigationView.getHeaderView(0).findViewById(R.id.drawer_head_name);
         this.tablesNavHostFragment = NavHostFragment.create(R.navigation.nav_graph);
         this.menuNavHostFragment = NavHostFragment.create(R.navigation.nav_graph_menu_setting);
         this.historyTablesNavHostFragment = NavHostFragment.create(R.navigation.nav_graph_history);
@@ -167,25 +166,29 @@ public class MainActivity extends AppCompatActivity {
 
         //
         drawerHeadUserId.setText(this.user.getId());
+        // Set drawer header Logout button
+        drawerNavigationView.getHeaderView(0).findViewById(R.id.button_drawer_header_logout).setOnClickListener(v -> {
+            this.logout();
+        });
 
         // Set Fire Storage reference
-        storageReference = FirebaseStorage.getInstance().getReference().child(ShawnOrder.COLLECTION_DISHES);
+        this.storageReference = FirebaseStorage.getInstance().getReference().child(ShawnOrder.COLLECTION_DISHES);
 
         // Get Fire Cloud instance
-        db = FirebaseFirestore.getInstance();
+        this.db = FirebaseFirestore.getInstance();
 
         // Get Tables information
 //        db.collection(ShawnOrder.COLLECTION_TABLES).whereEqualTo(Table.COLUMN_GROUP, user.getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
 //        });
 
         // Get extra information
-        db.collection(ShawnOrder.COLLECTION_OTHERS).whereEqualTo(Other.COLUMN_GROUP, user.getGroup()).limit(1).get().addOnSuccessListener(queryDocumentSnapshots -> {
+        this.db.collection(ShawnOrder.COLLECTION_OTHERS).whereEqualTo(Other.COLUMN_GROUP, user.getGroup()).limit(1).get().addOnSuccessListener(queryDocumentSnapshots -> {
             this.other = queryDocumentSnapshots.getDocuments().get(0).toObject(Other.class);
         });
 
         // Init dish list
-        dishList = new ArrayList<>();
-        menuImagesMap = new HashMap<>();
+        this.dishList = new ArrayList<>();
+        this.menuImagesMap = new HashMap<>();
         this.refreshMenu();
 
         //
@@ -284,9 +287,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if (this.currentFragment instanceof FragmentHistoryOrderDone) {
-//                Bundle bundle = new Bundle();
-//                bundle.putString(FragmentDishes.ARG_TABLE, new Gson().toJson(((FragmentOrderDone) currentFragment).getTable()));
-
                 this.historyTablesNavHostFragment.getNavController().navigate(R.id.action_framelayout_nav_history_order_done_to_framelayout_nav_history_tables, new Bundle());
                 this.actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
             }
@@ -384,6 +384,31 @@ public class MainActivity extends AppCompatActivity {
             refreshMenuImages();
         }).addOnFailureListener(e -> {
             // TODO
+        });
+    }
+
+    /**
+     *
+     */
+    public void logout() {
+        this.localDb.userDao().delete(this.user);
+
+        Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+    }
+
+    /**
+     *
+     */
+    public void authenticate() {
+        this.db.collection(ShawnOrder.COLLECTION_USERS).document(this.user.getId()).get().addOnSuccessListener(documentSnapshot -> {
+            User latest = documentSnapshot.toObject(User.class);
+            if (!Objects.equals(latest, this.user)) {
+                this.logout();
+            }
+        }).addOnFailureListener(e -> {
+            this.logout();
         });
     }
 

@@ -13,6 +13,10 @@
             android:icon="@drawable/ic_local_dining_black_24dp"
             android:title="@string/drawer_menu" />
         <item
+            android:id="@+id/fragment_drawer_setting"
+            android:icon="@drawable/ic_settings_black_24dp"
+            android:title="@string/drawer_setting" />
+        <item
             android:id="@+id/fragment_drawer_personnel"
             android:icon="@drawable/ic_person_add_black_24dp"
             android:title="@string/drawer_profile" />
@@ -20,10 +24,6 @@
             android:id="@+id/fragment_drawer_history"
             android:icon="@drawable/ic_history_black_24dp"
             android:title="@string/drawer_history" />
-        <item
-            android:id="@+id/fragment_drawer_setting"
-            android:icon="@drawable/ic_settings_black_24dp"
-            android:title="@string/drawer_setting" />
     </group>
     <!--    <item android:title="@string/drawer_other">-->
     <!--        <menu>-->

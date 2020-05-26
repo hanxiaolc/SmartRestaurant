@@ -153,7 +153,7 @@ public class FragmentPersonnelMembers extends Fragment {
         inflater.inflate(R.menu.option_menu_personnel, menu);
 
         if (!((MainActivity) requireActivity()).getUser().isManager()) {
-            menu.getItem(R.id.button_menu_personnel_add_new).setVisible(false);
+            menu.getItem(0).setVisible(false);
         }
     }
 

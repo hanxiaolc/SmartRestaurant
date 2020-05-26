@@ -9,13 +9,14 @@
     <string name="user_id">User ID</string>
     <string name="hint_user_id">Shawn1993</string>
     <string name="password">Password</string>
-    <string name="is_manager">I am a manager</string>
+    <string name="is_manager">Sign up for a new organization</string>
     <string name="company_code">Group Code</string>
     <string name="hint_company_code">0000</string>
     <string name="sign_up_email">Email</string>
     <string name="hint_sign_up_email">plateful@gmail.com</string>
     <string name="button_register">SIGN UP</string>
     <string name="button_login">LOGIN</string>
+    <string name="button_drawer_header_logout">LOGOUT</string>
     <string name="button_new_member">ADD NEW</string>
     <string name="textView_login_head">WELCOME COMING!</string>
     <string name="textView_login_introduce">It is a convenient app can be used to deal with basic order tasks in restaurants.</string>
