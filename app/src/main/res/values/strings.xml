@@ -51,6 +51,7 @@
     <string name="button_add_to_menu">ADD TO MENU</string>
     <string name="button_update">UPDATE</string>
     <string name="button_delete">DELETE</string>
+    <string name="textView_sign_up_owner">This account will be created as a owner for a new group. If you want to add your members, please do not use this page. You can add them by using PERSONNEL selection in app menu after you login. </string>
     <string name="imageView_menu_dish_image_description">Dish image showed in menu</string>
     <string name="imageView_menu_edit_image_description">Edit image showed in menu</string>
     <string name="imageView_menu_table_image_description">Edit image showed in table</string>

@@ -18,7 +18,13 @@ public class Other {
     public static final String COLUMN_MENU_VERSION = "menuVersion";
 
     //
-    public static final String COLUMN_QUANTITY_OF_TABLES = "quantityOfTables";
+    public static final String COLUMN_TABLE_VERSION = "tableVersion";
+
+    //
+    public static final String COLUMN_MEMBER_VERSION = "memberVersion";
+
+    //
+//    public static final String COLUMN_QUANTITY_OF_TABLES = "quantityOfTables";
 
     //
     @NonNull
@@ -31,7 +37,15 @@ public class Other {
 
     //
     @ColumnInfo
-    private String quantityOfTables;
+    private long tableVersion;
+
+    //
+    @ColumnInfo
+    private long memberVersion;
+
+    //
+//    @ColumnInfo
+//    private int quantityOfTables;
 
 
     /**
@@ -72,14 +86,42 @@ public class Other {
     /**
      *
      */
-    public String getQuantityOfTables() {
-        return quantityOfTables;
+    public long getTableVersion() {
+        return tableVersion;
     }
 
     /**
      *
      */
-    public void setQuantityOfTables(String quantityOfTables) {
-        this.quantityOfTables = quantityOfTables;
+    public void setTableVersion(long tableVersion) {
+        this.tableVersion = tableVersion;
     }
+
+    /**
+     *
+     */
+    public long getMemberVersion() {
+        return memberVersion;
+    }
+
+    /**
+     *
+     */
+    public void setMemberVersion(long memberVersion) {
+        this.memberVersion = memberVersion;
+    }
+
+    //    /**
+//     *
+//     */
+//    public String getQuantityOfTables() {
+//        return quantityOfTables;
+//    }
+//
+//    /**
+//     *
+//     */
+//    public void setQuantityOfTables(String quantityOfTables) {
+//        this.quantityOfTables = quantityOfTables;
+//    }
 }

@@ -85,11 +85,7 @@ public class User {
      *
      */
     public boolean checkIsEmpty() {
-        if (null == this.password || null == this.email || null == this.group) {
-            return true;
-        }
-
-        return this.id.trim().isEmpty() || this.password.trim().isEmpty() || this.email.trim().isEmpty() || this.group.trim().isEmpty();
+        return this.id.trim().isEmpty() || this.password.trim().isEmpty();
     }
 
     /**
