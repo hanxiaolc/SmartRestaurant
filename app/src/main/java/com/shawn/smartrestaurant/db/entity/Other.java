@@ -24,6 +24,9 @@ public class Other {
     public static final String COLUMN_MEMBER_VERSION = "memberVersion";
 
     //
+    public static final String COLUMN_HISTORY_VERSION = "historyVersion";
+
+    //
 //    public static final String COLUMN_QUANTITY_OF_TABLES = "quantityOfTables";
 
     //
@@ -42,6 +45,10 @@ public class Other {
     //
     @ColumnInfo
     private long memberVersion;
+
+    //
+    @ColumnInfo
+    private long historyVersion;
 
     //
 //    @ColumnInfo
@@ -109,6 +116,20 @@ public class Other {
      */
     public void setMemberVersion(long memberVersion) {
         this.memberVersion = memberVersion;
+    }
+
+    /**
+     *
+     */
+    public long getHistoryVersion() {
+        return historyVersion;
+    }
+
+    /**
+     *
+     */
+    public void setHistoryVersion(long historyVersion) {
+        this.historyVersion = historyVersion;
     }
 
     //    /**

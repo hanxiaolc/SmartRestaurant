@@ -1,8 +1,6 @@
 package com.shawn.smartrestaurant.ui.main;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.AutoCompleteTextView;
@@ -18,8 +16,6 @@ import androidx.navigation.fragment.NavHostFragment;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
 import com.shawn.smartrestaurant.Code;
 import com.shawn.smartrestaurant.R;
@@ -37,7 +33,6 @@ import com.shawn.smartrestaurant.ui.main.history.done.FragmentHistoryOrderDone;
 import com.shawn.smartrestaurant.ui.main.personnel.add.FragmentPersonnelAdd;
 import com.shawn.smartrestaurant.ui.main.setting.FragmentSetting;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -89,13 +84,13 @@ public class MainActivity extends AppCompatActivity {
     private AutoCompleteTextView autoCompleteTextView;
 
     //
-    private StorageReference storageReference;
+//    private StorageReference storageReference;
 
     //
     private List<Dish> dishList;
 
-    //
-    private Map<String, Bitmap> menuImagesMap;
+//    //
+//    private Map<String, Bitmap> menuImagesMap;
 
     //
     private Other other;
@@ -104,13 +99,16 @@ public class MainActivity extends AppCompatActivity {
     private Map<String, Table> tableMap;
 
     //
+    private List<User> memberList;
+
+    //
     private List<Table> historyTableList;
 
     //
     private boolean personnelChanged;
 
     //
-    private List<User> memberList;
+    private boolean menuChanged;
 
 
     /**
@@ -135,8 +133,12 @@ public class MainActivity extends AppCompatActivity {
         this.drawerLayout.addDrawerListener(this.actionBarDrawerToggle);
 
         // Set drawer navigation view
-        //
         NavigationView drawerNavigationView = findViewById(R.id.nav_view);
+
+        // Set drawer header Logout button
+        drawerNavigationView.getHeaderView(0).findViewById(R.id.button_drawer_header_logout).setOnClickListener(v -> {
+            this.logout();
+        });
 
         // TODO
         // this.drawerNavigationView.getMenu().getItem(3).setActionView(R.layout.action_reminder_dot);
@@ -147,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
             this.currentMenuItem.setChecked(true);
         }
 
-        TextView drawerHeadUserId = drawerNavigationView.getHeaderView(0).findViewById(R.id.drawer_head_name);
+
         this.tablesNavHostFragment = NavHostFragment.create(R.navigation.nav_graph);
         this.menuNavHostFragment = NavHostFragment.create(R.navigation.nav_graph_menu_setting);
         this.historyTablesNavHostFragment = NavHostFragment.create(R.navigation.nav_graph_history);
@@ -165,36 +167,27 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //
-        drawerHeadUserId.setText(this.user.getId());
-        // Set drawer header Logout button
-        drawerNavigationView.getHeaderView(0).findViewById(R.id.button_drawer_header_logout).setOnClickListener(v -> {
-            this.logout();
-        });
+        ((TextView) drawerNavigationView.getHeaderView(0).findViewById(R.id.drawer_head_name)).setText(this.user.getId());
+
 
         // Set Fire Storage reference
-        this.storageReference = FirebaseStorage.getInstance().getReference().child(ShawnOrder.COLLECTION_DISHES);
+//        this.storageReference = FirebaseStorage.getInstance().getReference().child(ShawnOrder.COLLECTION_DISHES);
 
         // Get Fire Cloud instance
         this.db = FirebaseFirestore.getInstance();
 
-        // Get Tables information
-//        db.collection(ShawnOrder.COLLECTION_TABLES).whereEqualTo(Table.COLUMN_GROUP, user.getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
-//        });
-
         // Get extra information
-        this.db.collection(ShawnOrder.COLLECTION_OTHERS).whereEqualTo(Other.COLUMN_GROUP, user.getGroup()).limit(1).get().addOnSuccessListener(queryDocumentSnapshots -> {
-            this.other = queryDocumentSnapshots.getDocuments().get(0).toObject(Other.class);
-        });
-
+//        this.db.collection(ShawnOrder.COLLECTION_OTHERS).whereEqualTo(Other.COLUMN_GROUP, user.getGroup()).limit(1).get().addOnSuccessListener(queryDocumentSnapshots -> {
+//            this.other = queryDocumentSnapshots.getDocuments().get(0).toObject(Other.class);
+//        });
         // Init dish list
-        this.dishList = new ArrayList<>();
-        this.menuImagesMap = new HashMap<>();
-        this.refreshMenu();
+//        this.dishList = new ArrayList<>();
+//        this.menuImagesMap = new HashMap<>();
+//        this.refreshMenu();
 
         //
         if (0 == getSupportFragmentManager().getFragments().size()) {
             getSupportFragmentManager().beginTransaction().add(R.id.fragmentLayout_main, this.tablesNavHostFragment).commit();
-//            getSupportFragmentManager().beginTransaction().add(R.id.fragmentLayout_main, this.menuNavHostFragment).commit();
         }
     }
 
@@ -234,8 +227,8 @@ public class MainActivity extends AppCompatActivity {
                         case R.id.fragment_drawer_history:
                             getSupportFragmentManager().beginTransaction().replace(R.id.fragmentLayout_main, this.historyTablesNavHostFragment).commit();
                             break;
-                        default:
-                            //getSupportFragmentManager().beginTransaction().replace(R.id.fragmentLayout_main, this.tablesNavHostFragment).commit();
+//                        default:
+//                            getSupportFragmentManager().beginTransaction().replace(R.id.fragmentLayout_main, this.tablesNavHostFragment).commit();
                     }
                     this.drawerLayout.closeDrawers();
                     return true;
@@ -292,7 +285,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if (this.currentFragment instanceof FragmentAddMenu) {
-                this.menuNavHostFragment.getNavController().navigate(R.id.action_fragment_nav_addmenu_to_fragment_nav_menu, new Bundle());
+                this.menuNavHostFragment.getNavController().navigate(R.id.action_framelayout_nav_addmenu_to_framelayout_nav_menu, new Bundle());
                 this.actionBarDrawerToggle.setDrawerIndicatorEnabled(true);
             }
         });
@@ -303,47 +296,12 @@ public class MainActivity extends AppCompatActivity {
     /**
      *
      */
-    public void clearFileDir() {
-        if (null != Objects.requireNonNull(getFilesDir()).listFiles()) {
-            for (File f : Objects.requireNonNull(getFilesDir().listFiles())) {
-                if (f.getName().contains("jpg")) {
-                    f.delete();
-                }
-            }
-        }
-    }
-
-    /**
-     *
-     */
-    public void refreshMenuImages() {
-        this.menuImagesMap.clear();
-//            this.clearFileDir();
-
-        for (Dish dish : Objects.requireNonNull(this.dishList)) {
-            if (dish.isHasImage()) {
-                storageReference.child(dish.getId() + ".jpg").getBytes(Code.TEN_MEGABYTE).addOnSuccessListener(bytes -> {
-                    this.menuImagesMap.put(dish.getId(), BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
-                }).addOnFailureListener(e -> {
-                    // TODO Add OnFailedListener
-                });
-            }
-        }
-    }
-
-    /**
-     *
-     */
-//    public void refreshDishList(List<Dish> dishList) {
-//
-//        if (null != dishList) {
-//            this.dishList = new ArrayList<>();
-//            localDb.dishDao().deleteAll();
-//
-//            this.dishList = dishList;
-//
-//            for (Dish dish : Objects.requireNonNull(dishList)) {
-//                localDb.dishDao().insert(dish);
+//    public void clearFileDir() {
+//        if (null != Objects.requireNonNull(getFilesDir()).listFiles()) {
+//            for (File f : Objects.requireNonNull(getFilesDir().listFiles())) {
+//                if (f.getName().contains("jpg")) {
+//                    f.delete();
+//                }
 //            }
 //        }
 //    }
@@ -351,41 +309,20 @@ public class MainActivity extends AppCompatActivity {
     /**
      *
      */
-//    public void getDbDishes(String group) {
+//    public void refreshMenuImages() {
+//        this.menuImagesMap.clear();
+////            this.clearFileDir();
 //
-//        //
-//        db.collection(ShawnOrder.COLLECTION_OTHERS).whereEqualTo(Other.COLUMN_GROUP, group).get().addOnCompleteListener(task -> {
-//            Other other = getOtherTask.getResult().getDocuments().get(0).toObject(Other.class);
-//            if (((MainActivity) requireActivity()).getOther().getMenuVersion() != other.getMenuVersion()) {
-//                ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_DISHES).whereEqualTo(Other.COLUMN_GROUP, ((MainActivity) requireActivity()).getUser().getGroup()).get().addOnCompleteListener(getDishesTask -> {
-//                    List<Dish> dishList = new ArrayList<>();
-//                    for () {
-//                        getDishesTask.getResult().getDocuments().
-//                    }
-//                    getDishesTask.getResult().getDocuments().
+//        for (Dish dish : Objects.requireNonNull(this.dishList)) {
+//            if (dish.isHasImage()) {
+//                storageReference.child(dish.getId() + ".jpg").getBytes(Code.TEN_MEGABYTE).addOnSuccessListener(bytes -> {
+//                    this.menuImagesMap.put(dish.getId(), BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
+//                }).addOnFailureListener(e -> {
+//                    // TODO Add OnFailedListener
 //                });
 //            }
-//        }).addOnFailureListener(e -> {
-//            // TODO
-//        });
+//        }
 //    }
-
-    /**
-     *
-     */
-    public void refreshMenu() {
-        db.collection(ShawnOrder.COLLECTION_DISHES).whereEqualTo(Dish.COLUMN_GROUP, user.getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
-            this.dishList.clear();
-            for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
-                dishList.add(ds.toObject(Dish.class));
-            }
-
-            // refreshMenuImages
-            refreshMenuImages();
-        }).addOnFailureListener(e -> {
-            // TODO
-        });
-    }
 
     /**
      *
@@ -409,6 +346,147 @@ public class MainActivity extends AppCompatActivity {
             }
         }).addOnFailureListener(e -> {
             this.logout();
+        });
+    }
+
+    /**
+     *
+     */
+    public void dataUpdate(/** ProgressBar processBar*/TextView listenerDishes, TextView listenerTables, TextView listenerUsers, TextView listenerHistory) {
+        // Block UI and show progress bar
+//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+//        processBar.setVisibility(View.VISIBLE);
+        if (null == this.other) {
+            this.other = new Other();
+        }
+
+        this.db.collection(ShawnOrder.COLLECTION_OTHERS).document(this.user.getGroup()).get().addOnSuccessListener(documentSnapshot -> {
+            Other latestOther = documentSnapshot.toObject(Other.class);
+
+            if (this.other.getMenuVersion() != Objects.requireNonNull(latestOther).getMenuVersion()) {
+                this.updateDishes(listenerDishes);
+            } else {
+                if (null != listenerDishes) {
+                    listenerDishes.setText(Code.READY);
+                }
+            }
+
+            if (this.other.getTableVersion() != Objects.requireNonNull(latestOther).getTableVersion()) {
+                this.updateTables(listenerTables);
+            } else {
+                if (null != listenerTables) {
+                    listenerTables.setText(Code.READY);
+                }
+            }
+
+            if (this.other.getMemberVersion() != Objects.requireNonNull(latestOther).getMemberVersion()) {
+                this.updateUsers(listenerUsers);
+            } else {
+                if (null != listenerUsers) {
+                    listenerUsers.setText(Code.READY);
+                }
+            }
+
+            if (this.other.getHistoryVersion() != Objects.requireNonNull(latestOther).getHistoryVersion()) {
+                this.updateHistory(listenerHistory);
+            } else {
+                if (null != listenerHistory) {
+                    listenerHistory.setText(Code.READY);
+                }
+            }
+
+            this.other = latestOther;
+
+            // Release blocking UI and hide progress bar
+//            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+//            processBar.setVisibility(View.GONE);
+        });
+    }
+
+    /**
+     *
+     */
+    public void updateDishes(TextView listener) {
+
+        this.dishList = new ArrayList<>();
+        this.db.collection(ShawnOrder.COLLECTION_DISHES).whereEqualTo(Dish.COLUMN_GROUP, this.user.getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+            for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
+                this.dishList.add(ds.toObject(Dish.class));
+            }
+
+            if (null != listener) {
+                listener.setText(Code.READY);
+            }
+
+//            Collections.sort(this.dishList, (o1, o2) -> {
+//                if (null == o1.getDishCode() && null == o2.getDishCode()) {
+//                    return 0;
+//                } else if (null == o1.getDishCode()) {
+//                    return "".compareTo(o2.getDishCode());
+//                } else if (null == o2.getDishCode()) {
+//                    return o1.getDishCode().compareTo("");
+//                } else {
+//                    return o1.getDishCode().compareTo(o2.getDishCode());
+//                }
+//            });
+        });
+    }
+
+    /**
+     *
+     */
+    public void updateTables(TextView listener) {
+        this.tableMap = new HashMap<>();
+        this.db.collection(ShawnOrder.COLLECTION_TABLES).whereEqualTo(Table.COLUMN_GROUP, this.user.getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+            for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
+                Table table = ds.toObject(Table.class);
+                this.getTableMap().put(Objects.requireNonNull(table).getId(), table);
+            }
+
+            if (null != listener) {
+                listener.setText(Code.READY);
+            }
+        });
+    }
+
+    /**
+     *
+     */
+    public void updateUsers(TextView listener) {
+        this.memberList = new ArrayList<>();
+        this.db.collection(ShawnOrder.COLLECTION_USERS).whereEqualTo(User.COLUMN_GROUP, this.user.getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+            for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
+                this.memberList.add(ds.toObject(User.class));
+            }
+
+            if (null != listener) {
+                listener.setText(Code.READY);
+            }
+        });
+    }
+
+    /**
+     *
+     */
+    public void updateHistory(TextView listener) {
+        this.historyTableList = new ArrayList<>();
+        this.db.collection(ShawnOrder.COLLECTION_HISTORY).whereEqualTo(Table.COLUMN_GROUP, this.user.getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+            for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
+                this.historyTableList.add(ds.toObject(Table.class));
+            }
+
+            if (null != listener) {
+                listener.setText(Code.READY);
+            }
+        });
+    }
+
+    /**
+     *
+     */
+    public void updateOthers() {
+        this.db.collection(ShawnOrder.COLLECTION_OTHERS).document(this.user.getGroup()).get().addOnSuccessListener(documentSnapshot -> {
+            this.other = documentSnapshot.toObject(Other.class);
         });
     }
 
@@ -553,20 +631,6 @@ public class MainActivity extends AppCompatActivity {
     /**
      *
      */
-    public StorageReference getStorageReference() {
-        return storageReference;
-    }
-
-    /**
-     *
-     */
-    public void setStorageReference(StorageReference storageReference) {
-        this.storageReference = storageReference;
-    }
-
-    /**
-     *
-     */
     public NavHostFragment getMenuNavHostFragment() {
         return menuNavHostFragment;
     }
@@ -590,20 +654,6 @@ public class MainActivity extends AppCompatActivity {
      */
     public void setDishList(List<Dish> dishList) {
         this.dishList = dishList;
-    }
-
-    /**
-     *
-     */
-    public Map<String, Bitmap> getMenuImagesMap() {
-        return menuImagesMap;
-    }
-
-    /**
-     *
-     */
-    public void setMenuImagesMap(Map<String, Bitmap> menuImagesMap) {
-        this.menuImagesMap = menuImagesMap;
     }
 
     /**
@@ -660,6 +710,20 @@ public class MainActivity extends AppCompatActivity {
      */
     public void setPersonnelChanged(boolean personnelChanged) {
         this.personnelChanged = personnelChanged;
+    }
+
+    /**
+     *
+     */
+    public boolean isMenuChanged() {
+        return menuChanged;
+    }
+
+    /**
+     *
+     */
+    public void setMenuChanged(boolean menuChanged) {
+        this.menuChanged = menuChanged;
     }
 
     /**

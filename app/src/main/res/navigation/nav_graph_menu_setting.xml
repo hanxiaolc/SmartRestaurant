@@ -3,24 +3,24 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph_menu_setting"
-    app:startDestination="@id/fragment_nav_menu">
+    app:startDestination="@id/framelayout_nav_menu">
 
     <fragment
-        android:id="@+id/fragment_nav_menu"
+        android:id="@+id/framelayout_nav_menu"
         android:name="com.shawn.smartrestaurant.ui.main.menu.FragmentMenu"
-        android:label="fragment_nav_menu"
-        tools:layout="@layout/fragment_nav_menu">
+        android:label="framelayout_nav_menu"
+        tools:layout="@layout/framelayout_nav_menu">
         <action
-            android:id="@+id/action_fragment_nav_menu_to_fragment_nav_addmenu"
-            app:destination="@id/fragment_nav_addmenu" />
+            android:id="@+id/action_framelayout_nav_menu_to_framelayout_nav_addmenu"
+            app:destination="@id/framelayout_nav_addmenu" />
     </fragment>
     <fragment
-        android:id="@+id/fragment_nav_addmenu"
+        android:id="@+id/framelayout_nav_addmenu"
         android:name="com.shawn.smartrestaurant.ui.main.addmenu.FragmentAddMenu"
-        android:label="fragment_nav_addmenu"
-        tools:layout="@layout/fragment_nav_addmenu">
+        android:label="framelayout_nav_addmenu"
+        tools:layout="@layout/framelayout_nav_addmenu">
         <action
-            android:id="@+id/action_fragment_nav_addmenu_to_fragment_nav_menu"
-            app:destination="@id/fragment_nav_menu" />
+            android:id="@+id/action_framelayout_nav_addmenu_to_framelayout_nav_menu"
+            app:destination="@id/framelayout_nav_menu" />
     </fragment>
 </navigation>

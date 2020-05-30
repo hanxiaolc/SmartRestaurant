@@ -1,28 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/fragment_nav_tables"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.main.tables.FragmentTables">
+    tools:context=".ui.main.menu.FragmentMenu">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/tables_recyclerView"
+        android:id="@+id/recyclerView_menu"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbars="vertical" />
 
     <ProgressBar
-        android:id="@+id/progressBar_tables"
+        android:id="@+id/progressBar_menu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:visibility="gone" />
 
     <TextView
-        android:id="@+id/textView_tables_listener"
+        android:id="@+id/textView_menu_listener"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:visibility="gone" />
-
 </FrameLayout>

@@ -1,87 +1,116 @@
 package com.shawn.smartrestaurant.ui.main.menu;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.TextView;
 
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.shawn.smartrestaurant.Code;
 import com.shawn.smartrestaurant.R;
 import com.shawn.smartrestaurant.db.entity.Dish;
-import com.shawn.smartrestaurant.db.entity.Other;
-import com.shawn.smartrestaurant.db.firebase.ShawnOrder;
 import com.shawn.smartrestaurant.ui.main.MainActivity;
-import com.shawn.smartrestaurant.ui.main.addmenu.FragmentAddMenu;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 
 /**
- * A simple {@link Fragment} subclass.
- * Use the {@link FragmentMenu#newInstance} factory method to
- * create an instance of this fragment.
+ *
  */
 public class FragmentMenu extends Fragment {
 
-    //
-    private RecyclerView recyclerView;
-
-    //
-    private String dataStatus;
-
-    //
-    private RecyclerView.Adapter adapter;
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    public FragmentMenu() {
-        // Required empty public constructor
-    }
 
     /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
      *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment FragmentMenus.
      */
-    // TODO: Rename and change types and number of parameters
-    public static FragmentMenu newInstance(String param1, String param2) {
-        FragmentMenu fragment = new FragmentMenu();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    public class ReadyListenerTextWatcher implements TextWatcher {
+
+        //
+        private MenuRecyclerViewAdapter adapter;
+
+        /**
+         *
+         */
+        ReadyListenerTextWatcher(MenuRecyclerViewAdapter adapter) {
+            this.adapter = adapter;
+        }
+
+        /**
+         *
+         */
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+
+        /**
+         *
+         */
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+
+        /**
+         *
+         */
+        @Override
+        public void afterTextChanged(Editable s) {
+
+            if (!Code.READY.equals(s.toString())) {
+                return;
+            }
+
+            this.adapter.setDishList(prepareDishList(((MainActivity) requireActivity()).getDishList()));
+            this.adapter.notifyDataSetChanged();
+
+            // Release blocking UI and hide progress bar
+            requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            requireView().findViewById(R.id.progressBar_menu).setVisibility(View.GONE);
+
+            s.clear();
+        }
     }
+
+
+    /**
+     *
+     */
+    public FragmentMenu() {
+    }
+
+
+//    /**
+//     * Use this factory method to create a new instance of
+//     * this fragment using the provided parameters.
+//     *
+//     * @param param1 Parameter 1.
+//     * @param param2 Parameter 2.
+//     * @return A new instance of fragment FragmentMenus.
+//     */
+//    public static FragmentMenu newInstance(String param1, String param2) {
+//        FragmentMenu fragment = new FragmentMenu();
+//        Bundle args = new Bundle();
+//        args.putString(ARG_PARAM1, param1);
+//        args.putString(ARG_PARAM2, param2);
+//        fragment.setArguments(args);
+//        return fragment;
+//    }
 
     /**
      *
@@ -89,15 +118,14 @@ public class FragmentMenu extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+//        if (getArguments() != null) {
+//            mParam1 = getArguments().getString(ARG_PARAM1);
+//            mParam2 = getArguments().getString(ARG_PARAM2);
+//        }
 
         // Remember to set has option menu true
-        if (((MainActivity) requireActivity()).getUser().isManager()) {
-            setHasOptionsMenu(true);
-        }
+        setHasOptionsMenu(true);
+
         ((MainActivity) requireActivity()).setCurrentFragment(this);
     }
 
@@ -108,40 +136,24 @@ public class FragmentMenu extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        // Get Dish information from local DB and prepare group titles
-        //List<Dish> dishList = prepareDishList(((MainActivity) requireActivity()).getDishList());
-
-        // TODO
-//        dishList.clear();
-//        dishList.addAll(setUpDishList());
-
         // Get the fragmentView and recyclerView
-        View fragmentMenu = inflater.inflate(R.layout.fragment_nav_menu, container, false);
-        this.recyclerView = fragmentMenu.findViewById(R.id.recyclerView_menu);
+        View fragmentMenu = inflater.inflate(R.layout.framelayout_nav_menu, container, false);
+        RecyclerView recyclerView = fragmentMenu.findViewById(R.id.recyclerView_menu);
 
         // Set LayoutManager
         LinearLayoutManager manager = new LinearLayoutManager(getContext());
-        this.recyclerView.setLayoutManager(manager);
+        recyclerView.setLayoutManager(manager);
 
         // Set default dividing line
-        this.recyclerView.addItemDecoration(new DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL));
+        recyclerView.addItemDecoration(new DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL));
 
         // Bind RecyclerViewAdapter to recyclerView
-        this.adapter = new MenuRecyclerViewAdapter(prepareDishList(((MainActivity) requireActivity()).getDishList()), ((MainActivity) requireActivity()).getMenuImagesMap());
-        // this.recyclerView.setAdapter(new MenuRecyclerViewAdapter(prepareDishList(((MainActivity) requireActivity()).getDishList()), ((MainActivity) requireActivity()).getMenuImagesMap()));
-        this.recyclerView.setAdapter(this.adapter);
+        MenuRecyclerViewAdapter adapter = new MenuRecyclerViewAdapter(new ArrayList<>());
+        recyclerView.setAdapter(adapter);
+
+        ((TextView) fragmentMenu.findViewById(R.id.textView_menu_listener)).addTextChangedListener(new ReadyListenerTextWatcher(adapter));
+
         return fragmentMenu;
-    }
-
-    /**
-     *
-     */
-    @Override
-    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-
-        // Inflate add new menu
-        inflater.inflate(R.menu.option_menu_add_menu, menu);
     }
 
     /**
@@ -151,22 +163,25 @@ public class FragmentMenu extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_OTHERS).whereEqualTo(Other.COLUMN_GROUP, ((MainActivity) requireActivity()).getUser().getGroup()).get().addOnSuccessListener(getOtherQueryDocumentSnapshots -> {
-            if (((MainActivity) requireActivity()).getOther().getMenuVersion() != getOtherQueryDocumentSnapshots.getDocuments().get(0).toObject(Other.class).getMenuVersion()) {
-                ((MainActivity) requireActivity()).refreshMenu();
-                ((MainActivity) requireActivity()).setOther(getOtherQueryDocumentSnapshots.getDocuments().get(0).toObject(Other.class));
+        // Block UI and show progress bar
+        requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        requireView().findViewById(R.id.progressBar_menu).setVisibility(View.VISIBLE);
 
-                ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_DISHES).whereEqualTo(Dish.COLUMN_GROUP, ((MainActivity) requireActivity()).getUser().getGroup()).get().addOnSuccessListener(getMenuQueryDocumentSnapshots -> {
-                    List<Dish> list = new ArrayList<>();
-                    for (DocumentSnapshot ds : getMenuQueryDocumentSnapshots.getDocuments()) {
-                        list.add(ds.toObject(Dish.class));
-                    }
-                    ((MenuRecyclerViewAdapter) this.recyclerView.getAdapter()).setDishList(prepareDishList(list));
-                    ((MenuRecyclerViewAdapter) this.recyclerView.getAdapter()).setMenuImagesMap(((MainActivity) requireActivity()).getMenuImagesMap());
-                    this.recyclerView.getAdapter().notifyDataSetChanged();
-                });
-            }
-        });
+        ((MainActivity) requireActivity()).dataUpdate(view.findViewById(R.id.textView_menu_listener), null, null, null);
+    }
+
+    /**
+     *
+     */
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+
+        inflater.inflate(R.menu.option_menu_add_menu, menu);
+
+        if (!((MainActivity) requireActivity()).getUser().isManager()) {
+            menu.getItem(0).setVisible(false);
+        }
     }
 
     /**
@@ -174,20 +189,19 @@ public class FragmentMenu extends Fragment {
      */
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        Bundle bundle = new Bundle();
 
         if (item.getItemId() == R.id.button_menu_add_menu) {
-            bundle.putString(FragmentAddMenu.ARG_ACTION, FragmentAddMenu.ACTION_ADD);
-            NavHostFragment.findNavController(this).navigate(R.id.action_fragment_nav_menu_to_fragment_nav_addmenu, bundle);
+            NavHostFragment.findNavController(this).navigate(R.id.action_framelayout_nav_menu_to_framelayout_nav_addmenu, null);
             return true;
         }
+
         if (item.getItemId() == R.id.button_menu_refresh) {
 
-            // Update data in memory
-            ((MainActivity) requireActivity()).refreshMenu();
+            // Block UI and show progress bar
+            requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            requireView().findViewById(R.id.progressBar_menu).setVisibility(View.VISIBLE);
 
-            // Set memory data to recycler view
-            recyclerView.setAdapter(new MenuRecyclerViewAdapter(prepareDishList(((MainActivity) requireActivity()).getDishList())));
+            ((MainActivity) requireActivity()).dataUpdate(requireView().findViewById(R.id.textView_menu_listener), null, null, null);
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -196,7 +210,7 @@ public class FragmentMenu extends Fragment {
     /**
      *
      */
-    private List<Dish> prepareDishList(List<Dish> dishList) {
+    private static List<Dish> prepareDishList(List<Dish> dishList) {
         if (null == dishList) {
             return new ArrayList<>();
         }
@@ -226,46 +240,6 @@ public class FragmentMenu extends Fragment {
         });
 
         return result;
-    }
-
-    /**
-     *
-     */
-    private void alertDisplay(String title, String message, DialogInterface.OnClickListener listener) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext())
-                .setTitle(title)
-                .setMessage(message)
-                .setPositiveButton("OK", listener);
-        AlertDialog alertDialogButton = builder.create();
-        alertDialogButton.show();
-    }
-
-    /**
-     *
-     */
-    public RecyclerView getRecyclerView() {
-        return recyclerView;
-    }
-
-    /**
-     *
-     */
-    public void setRecyclerView(RecyclerView recyclerView) {
-        this.recyclerView = recyclerView;
-    }
-
-    /**
-     *
-     */
-    public String getDataStatus() {
-        return dataStatus;
-    }
-
-    /**
-     *
-     */
-    public void setDataStatus(String dataStatus) {
-        this.dataStatus = dataStatus;
     }
 
     // TODO delete

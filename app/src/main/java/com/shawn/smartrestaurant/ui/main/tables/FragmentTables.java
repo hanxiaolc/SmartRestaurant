@@ -8,6 +8,8 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -15,12 +17,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.shawn.smartrestaurant.R;
+import com.shawn.smartrestaurant.db.entity.Dish;
 import com.shawn.smartrestaurant.db.entity.Table;
 import com.shawn.smartrestaurant.db.firebase.ShawnOrder;
 import com.shawn.smartrestaurant.ui.main.MainActivity;
+import com.shawn.smartrestaurant.ui.main.menu.MenuRecyclerViewAdapter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,21 +37,50 @@ import java.util.Objects;
  */
 public class FragmentTables extends Fragment {
 
-    //
-    private MainActivity activity;
+    /**
+     *
+     */
+    public class DishesReadyListenerTextWatcher implements TextWatcher {
 
-    //
-    private static final String ARG_PARAM1 = "param1";
+        //
+        private TablesRecyclerViewAdapter adapter;
 
-    //
-    private static final String ARG_PARAM2 = "param2";
+        /**
+         *
+         */
+        DishesReadyListenerTextWatcher(TablesRecyclerViewAdapter adapter) {
+            this.adapter = adapter;
+        }
 
-    //
-    private String mParam1;
+        /**
+         *
+         */
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
 
-    //
-    private String mParam2;
+        /**
+         *
+         */
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
 
+        /**
+         *
+         */
+        @Override
+        public void afterTextChanged(Editable s) {
+            this.adapter.setTableList(new ArrayList<>(((MainActivity) requireActivity()).getTableMap().values()));
+            this.adapter.notifyDataSetChanged();
+
+            s.clear();
+
+            // Release blocking UI and hide progress bar
+            requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            requireView().findViewById(R.id.progressBar_tables).setVisibility(View.GONE);
+        }
+    }
 
     /**
      *
@@ -54,23 +88,22 @@ public class FragmentTables extends Fragment {
     public FragmentTables() {
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment framelayout_nav_tables.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static FragmentTables newInstance(String param1, String param2) {
-        FragmentTables fragment = new FragmentTables();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
+//    /**
+//     * Use this factory method to create a new instance of
+//     * this fragment using the provided parameters.
+//     *
+//     * @param param1 Parameter 1.
+//     * @param param2 Parameter 2.
+//     * @return A new instance of fragment framelayout_nav_tables.
+//     */
+//    public static FragmentTables newInstance(String param1, String param2) {
+//        FragmentTables fragment = new FragmentTables();
+//        Bundle args = new Bundle();
+//        args.putString(ARG_PARAM1, param1);
+//        args.putString(ARG_PARAM2, param2);
+//        fragment.setArguments(args);
+//        return fragment;
+//    }
 
     /**
      *
@@ -81,17 +114,12 @@ public class FragmentTables extends Fragment {
 
         setHasOptionsMenu(true);
 
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-
         // initial current fragment in activity
 //        List<Fragment> fragments = Objects.requireNonNull((MainActivity) getActivity()).getSupportFragmentManager().getFragments().get(0).getChildFragmentManager().getFragments();
 //        if (1 == fragments.size() && fragments.get(0) instanceof FragmentTables) {
 //            ((MainActivity) getActivity()).setCurrentFragment(fragments.get(0));
 //        }
-        ((MainActivity) getActivity()).setCurrentFragment(this);
+        ((MainActivity) requireActivity()).setCurrentFragment(this);
     }
 
     /**
@@ -111,6 +139,8 @@ public class FragmentTables extends Fragment {
         TablesRecyclerViewAdapter tablesRecyclerViewAdapter = new TablesRecyclerViewAdapter(new ArrayList<>());
         recyclerView.setAdapter(tablesRecyclerViewAdapter);
 
+        ((TextView) fragmentTables.findViewById(R.id.textView_tables_listener)).addTextChangedListener(new DishesReadyListenerTextWatcher((TablesRecyclerViewAdapter) recyclerView.getAdapter()));
+
         return fragmentTables;
     }
 
@@ -120,35 +150,11 @@ public class FragmentTables extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
 
-        RecyclerView recyclerView = view.findViewById(R.id.tables_recyclerView);
-        TablesRecyclerViewAdapter adapter = (TablesRecyclerViewAdapter) recyclerView.getAdapter();
+        // Block UI and show progress bar
+        requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        requireView().findViewById(R.id.progressBar_tables).setVisibility(View.VISIBLE);
 
-        if (null == ((MainActivity) requireActivity()).getTableMap()) {
-            ((MainActivity) requireActivity()).setTableMap(new HashMap<>());
-
-            ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).whereEqualTo(Table.COLUMN_GROUP, ((MainActivity) requireActivity()).getUser().getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
-                int i = 0;
-                for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
-                    Table table = ds.toObject(Table.class);
-                    ((MainActivity) requireActivity()).getTableMap().put(Objects.requireNonNull(table).getId(), table);
-
-                    Objects.requireNonNull(adapter).getTableList().add(table);
-                    adapter.notifyItemInserted(i);
-                    i++;
-                }
-            });
-        } else {
-            if (0 == Objects.requireNonNull(adapter).getTableList().size()) {
-//                int i = 0;
-                Objects.requireNonNull(adapter).getTableList().addAll(((MainActivity) requireActivity()).getTableMap().values());
-                adapter.notifyDataSetChanged();
-//                for (Map.Entry entry : ((MainActivity) requireActivity()).getTableMap().entrySet()) {
-//                    Objects.requireNonNull(adapter).getTableList().add((Table) entry.getValue());
-//                    adapter.notifyItemInserted(i);
-//                    i++;
-//                }
-            }
-        }
+        ((MainActivity) requireActivity()).dataUpdate(null, view.findViewById(R.id.textView_tables_listener), null, null);
     }
 
     /**
@@ -173,30 +179,7 @@ public class FragmentTables extends Fragment {
             requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             requireView().findViewById(R.id.progressBar_tables).setVisibility(View.VISIBLE);
 
-            ((MainActivity) requireActivity()).setTableMap(new HashMap<>());
-
-            // TODO Add onFailureListener
-            ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).whereEqualTo(Table.COLUMN_GROUP, ((MainActivity) requireActivity()).getUser().getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
-                RecyclerView recyclerView = requireView().findViewById(R.id.tables_recyclerView);
-                TablesRecyclerViewAdapter adapter = (TablesRecyclerViewAdapter) recyclerView.getAdapter();
-                Objects.requireNonNull(adapter).getTableList().clear();
-                adapter.notifyDataSetChanged();
-
-                int i = 0;
-                for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
-                    Table table = ds.toObject(Table.class);
-                    ((MainActivity) requireActivity()).getTableMap().put(Objects.requireNonNull(table).getId(), table);
-
-                    adapter.getTableList().add(ds.toObject(Table.class));
-                    adapter.notifyItemInserted(i);
-                    i++;
-                }
-
-                // Release blocking UI and hide progress bar
-                requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-                requireView().findViewById(R.id.progressBar_tables).setVisibility(View.GONE);
-            });
-
+            ((MainActivity) requireActivity()).dataUpdate(null, requireView().findViewById(R.id.textView_tables_listener), null, null);
             return true;
         }
 

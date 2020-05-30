@@ -12,6 +12,9 @@ public class Code {
     public static final int MAX_NUMBER_OF_TABLES = 10;
 
     //
+    public static final String READY = "ready";
+
+    //
     private static final long ONE_MEGABYTE = 1024 * 1024 * 10;
 
     //

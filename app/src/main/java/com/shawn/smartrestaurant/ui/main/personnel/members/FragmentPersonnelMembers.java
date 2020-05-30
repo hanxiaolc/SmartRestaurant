@@ -129,16 +129,11 @@ public class FragmentPersonnelMembers extends Fragment {
                 }
             });
         } else {
-            Objects.requireNonNull(adapter).getMemberList().clear();
-            adapter.notifyDataSetChanged();
-
             int i = 0;
             for (User member : ((MainActivity) requireActivity()).getMemberList()) {
                 Objects.requireNonNull(adapter).getMemberList().add(member);
                 adapter.notifyItemInserted(i);
                 i++;
-
-                ((MainActivity) requireActivity()).getMemberList().add(member);
             }
         }
     }
