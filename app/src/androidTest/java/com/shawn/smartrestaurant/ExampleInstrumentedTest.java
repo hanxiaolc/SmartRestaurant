@@ -158,6 +158,14 @@ public class ExampleInstrumentedTest {
             localDb.userDao().updateUser(user);
         }
     }
+
+    @Test
+    // @Ignore("Test Method")
+    public void testDeleteUser() {
+
+        AppDatabase localDb = AppDatabase.getInstance(ApplicationProvider.getApplicationContext());
+        localDb.userDao().deleteAll();
+    }
 }
 
 

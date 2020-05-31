@@ -20,6 +20,7 @@ import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.shawn.smartrestaurant.Code;
 import com.shawn.smartrestaurant.R;
 import com.shawn.smartrestaurant.db.entity.Dish;
 import com.shawn.smartrestaurant.db.entity.Table;
@@ -71,14 +72,19 @@ public class FragmentTables extends Fragment {
          */
         @Override
         public void afterTextChanged(Editable s) {
+
+            if (!Code.READY.equals(s.toString())) {
+                return;
+            }
+
             this.adapter.setTableList(new ArrayList<>(((MainActivity) requireActivity()).getTableMap().values()));
             this.adapter.notifyDataSetChanged();
-
-            s.clear();
 
             // Release blocking UI and hide progress bar
             requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             requireView().findViewById(R.id.progressBar_tables).setVisibility(View.GONE);
+
+            s.clear();
         }
     }
 

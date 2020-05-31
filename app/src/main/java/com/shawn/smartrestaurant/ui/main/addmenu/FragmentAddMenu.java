@@ -4,11 +4,9 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.Navigation;
 
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,6 +33,8 @@ import com.shawn.smartrestaurant.ui.main.MainActivity;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
@@ -183,20 +183,41 @@ public class FragmentAddMenu extends Fragment {
                     return;
                 }
 
+                // Update menu version to others table.
+                long currentTime = System.currentTimeMillis();
                 ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_DISHES).document(this.newDash.getId()).set(this.newDash).addOnSuccessListener(aVoid -> {
 
-                    // Update menu version to others table.
-                    long currentTime = System.currentTimeMillis();
-                    // TODO Add failure handling
-                    ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_OTHERS).document(((MainActivity) requireActivity()).getUser().getGroup()).update(Other.COLUMN_MENU_VERSION, currentTime, Other.COLUMN_TABLE_VERSION, currentTime).addOnSuccessListener(aVoidUpdateOther -> {
+                    ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_DISHES).whereEqualTo(Dish.COLUMN_GROUP, ((MainActivity) requireActivity()).getUser().getGroup()).orderBy(Dish.COLUMN_ID).get().addOnSuccessListener(qdsDishes -> {
 
-                        // Release blocking UI and hide progress bar
-                        requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-                        this.requireView.findViewById(R.id.progressBar_add_menu).setVisibility(View.GONE);
-                        new MaterialAlertDialogBuilder(requireContext()).setTitle("Successful").setMessage("Menu information have been updated.").setPositiveButton("OK", (dialog, which) -> {
-                            ((MainActivity) requireActivity()).getMenuNavHostFragment().getNavController().navigate(R.id.action_framelayout_nav_addmenu_to_framelayout_nav_menu, new Bundle());
-                            ((MainActivity) requireActivity()).getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
-                        }).show();
+                        List<Dish> latestDishList = new ArrayList<>();
+                        for (DocumentSnapshot ds : qdsDishes.getDocuments()) {
+                            latestDishList.add(ds.toObject(Dish.class));
+                        }
+
+                        ((MainActivity) requireActivity()).setDishList(latestDishList);
+                        ((MainActivity) requireActivity()).getOther().setMenuVersion(currentTime);
+
+                        for (Map.Entry<String, Table> entry : ((MainActivity) requireActivity()).getTableMap().entrySet()) {
+                            ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(((MainActivity) requireActivity()).getUser().getGroup() + "_" + entry.getValue().getId()).update(Table.COLUMN_DISH_LIST, latestDishList, Table.COLUMN_UPDATE_USER, ((MainActivity) requireActivity()).getUser().getId(), Table.COLUMN_UPDATE_TIME, currentTime);
+
+                            entry.getValue().setDishList(latestDishList);
+                            entry.getValue().setUpdateUser(((MainActivity) requireActivity()).getUser().getId());
+                            entry.getValue().setUpdateTime(currentTime);
+                        }
+                        ((MainActivity) requireActivity()).getOther().setTableVersion(currentTime);
+
+                        // TODO Add failure handling
+                        ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_OTHERS).document(((MainActivity) requireActivity()).getUser().getGroup()).update(Other.COLUMN_MENU_VERSION, currentTime, Other.COLUMN_TABLE_VERSION, currentTime).addOnSuccessListener(aVoidUpdateOther -> {
+
+                            // Release blocking UI and hide progress bar
+                            requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                            this.requireView.findViewById(R.id.progressBar_add_menu).setVisibility(View.GONE);
+
+                            new MaterialAlertDialogBuilder(requireContext()).setTitle("Successful").setMessage("Menu information have been updated.").setPositiveButton("OK", (dialog, which) -> {
+                                ((MainActivity) requireActivity()).getMenuNavHostFragment().getNavController().navigate(R.id.action_framelayout_nav_addmenu_to_framelayout_nav_menu, new Bundle());
+                                ((MainActivity) requireActivity()).getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
+                            }).show();
+                        });
                     });
                 });
             });
@@ -313,7 +334,7 @@ public class FragmentAddMenu extends Fragment {
             // TODO Add failure handling
             ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_DISHES).whereEqualTo(Dish.COLUMN_DISH_NAME, dish.getDishName()).whereEqualTo(Dish.COLUMN_GROUP, dish.getGroup()).get().addOnSuccessListener(dsByName -> {
 
-                if (!Objects.requireNonNull(dsByName).isEmpty() && this.dish.getId().isEmpty()) {
+                if (!Objects.requireNonNull(dsByName).isEmpty() && ((this.dish.getId().isEmpty() || !(this.dish.getId().equals(Objects.requireNonNull(dsByName.getDocuments().get(0).toObject(Dish.class)).getId()))))) {
                     // Release blocking UI and hide progress bar
                     requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                     requireView().findViewById(R.id.progressBar_add_menu).setVisibility(View.GONE);

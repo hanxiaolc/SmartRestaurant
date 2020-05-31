@@ -2,6 +2,7 @@ package com.shawn.smartrestaurant.ui.main;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
@@ -358,13 +359,14 @@ public class MainActivity extends AppCompatActivity {
 //        processBar.setVisibility(View.VISIBLE);
         if (null == this.other) {
             this.other = new Other();
+            this.other.setId(this.user.getGroup());
         }
 
         this.db.collection(ShawnOrder.COLLECTION_OTHERS).document(this.user.getGroup()).get().addOnSuccessListener(documentSnapshot -> {
             Other latestOther = documentSnapshot.toObject(Other.class);
 
             if (this.other.getMenuVersion() != Objects.requireNonNull(latestOther).getMenuVersion()) {
-                this.updateDishes(listenerDishes);
+                this.updateDishes(listenerDishes, latestOther);
             } else {
                 if (null != listenerDishes) {
                     listenerDishes.setText(Code.READY);
@@ -372,7 +374,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if (this.other.getTableVersion() != Objects.requireNonNull(latestOther).getTableVersion()) {
-                this.updateTables(listenerTables);
+                this.updateTables(listenerTables, latestOther);
             } else {
                 if (null != listenerTables) {
                     listenerTables.setText(Code.READY);
@@ -380,7 +382,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if (this.other.getMemberVersion() != Objects.requireNonNull(latestOther).getMemberVersion()) {
-                this.updateUsers(listenerUsers);
+                this.updateUsers(listenerUsers, latestOther);
             } else {
                 if (null != listenerUsers) {
                     listenerUsers.setText(Code.READY);
@@ -388,14 +390,12 @@ public class MainActivity extends AppCompatActivity {
             }
 
             if (this.other.getHistoryVersion() != Objects.requireNonNull(latestOther).getHistoryVersion()) {
-                this.updateHistory(listenerHistory);
+                this.updateHistory(listenerHistory, latestOther);
             } else {
                 if (null != listenerHistory) {
                     listenerHistory.setText(Code.READY);
                 }
             }
-
-            this.other = latestOther;
 
             // Release blocking UI and hide progress bar
 //            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
@@ -406,13 +406,15 @@ public class MainActivity extends AppCompatActivity {
     /**
      *
      */
-    public void updateDishes(TextView listener) {
+    public void updateDishes(TextView listener, Other latestOther) {
 
         this.dishList = new ArrayList<>();
         this.db.collection(ShawnOrder.COLLECTION_DISHES).whereEqualTo(Dish.COLUMN_GROUP, this.user.getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
             for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
                 this.dishList.add(ds.toObject(Dish.class));
             }
+
+            this.other.setMenuVersion(latestOther.getMenuVersion());
 
             if (null != listener) {
                 listener.setText(Code.READY);
@@ -435,13 +437,20 @@ public class MainActivity extends AppCompatActivity {
     /**
      *
      */
-    public void updateTables(TextView listener) {
+    public void updateTables(TextView listener, Other latestOther) {
+
         this.tableMap = new HashMap<>();
-        this.db.collection(ShawnOrder.COLLECTION_TABLES).whereEqualTo(Table.COLUMN_GROUP, this.user.getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
-            for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
+        this.db.collection(ShawnOrder.COLLECTION_TABLES).whereEqualTo(Table.COLUMN_GROUP, this.user.getGroup()).orderBy(Table.COLUMN_ID).get().addOnSuccessListener(qdsTables -> {
+
+            for (DocumentSnapshot ds : qdsTables.getDocuments()) {
                 Table table = ds.toObject(Table.class);
-                this.getTableMap().put(Objects.requireNonNull(table).getId(), table);
+//                table.setDishList(this.dishList);
+//                table.setUpdateTime(System.currentTimeMillis());
+//                table.setUpdateUser(this.user.getId());
+                this.tableMap.put(Objects.requireNonNull(table).getId(), table);
             }
+
+            this.other.setTableVersion(latestOther.getTableVersion());
 
             if (null != listener) {
                 listener.setText(Code.READY);
@@ -452,13 +461,15 @@ public class MainActivity extends AppCompatActivity {
     /**
      *
      */
-    public void updateUsers(TextView listener) {
+    public void updateUsers(TextView listener, Other latestOther) {
         this.memberList = new ArrayList<>();
         this.db.collection(ShawnOrder.COLLECTION_USERS).whereEqualTo(User.COLUMN_GROUP, this.user.getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
             for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
                 this.memberList.add(ds.toObject(User.class));
             }
 
+            this.other.setMemberVersion(latestOther.getMemberVersion());
+
             if (null != listener) {
                 listener.setText(Code.READY);
             }
@@ -468,12 +479,14 @@ public class MainActivity extends AppCompatActivity {
     /**
      *
      */
-    public void updateHistory(TextView listener) {
+    public void updateHistory(TextView listener, Other latestOther) {
         this.historyTableList = new ArrayList<>();
         this.db.collection(ShawnOrder.COLLECTION_HISTORY).whereEqualTo(Table.COLUMN_GROUP, this.user.getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
             for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
                 this.historyTableList.add(ds.toObject(Table.class));
             }
+
+            this.other.setHistoryVersion(latestOther.getHistoryVersion());
 
             if (null != listener) {
                 listener.setText(Code.READY);

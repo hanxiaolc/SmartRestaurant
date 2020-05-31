@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -73,6 +74,10 @@ public class DishesRecyclerViewAdapter extends RecyclerView.Adapter {
         dishName.setText(dish.getDishName());
         dishPrice.setText("$ " + dish.getPrice());
         dishNumber.setText(String.valueOf(dish.getNumbers()));
+
+        if (null == dish.getDishCode() || dish.getDishCode().isEmpty()) {
+            dishCode.setVisibility(View.GONE);
+        }
 
         addButton.setOnClickListener(v -> {
             int number = Integer.parseInt(dishNumber.getText().toString());

@@ -8,6 +8,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -17,13 +18,17 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.gson.Gson;
 import com.shawn.smartrestaurant.Code;
 import com.shawn.smartrestaurant.R;
 import com.shawn.smartrestaurant.db.entity.Dish;
+import com.shawn.smartrestaurant.db.entity.Other;
 import com.shawn.smartrestaurant.db.entity.Table;
 import com.shawn.smartrestaurant.db.firebase.ShawnOrder;
 import com.shawn.smartrestaurant.ui.main.MainActivity;
+
+import java.util.Objects;
 
 
 /**
@@ -111,31 +116,67 @@ public class FragmentOrderDone extends Fragment {
         }
         totalPriceTextView.setText(" $" + String.format("%.2f", this.table.getPrice()));
 
+        ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(((MainActivity) requireActivity()).getUser().getGroup() + "_" + this.table.getId()).get().addOnSuccessListener(documentSnapshot -> {
+
+            if (this.table.getUpdateTime() != Objects.requireNonNull(documentSnapshot.toObject(Table.class)).getUpdateTime()) {
+                new MaterialAlertDialogBuilder(requireContext()).setTitle("Failed").setMessage("The status of this table had been changed, please try again after refreshing tables information in table list").setPositiveButton("ok", ((dialog, which) -> {
+                    ((MainActivity) requireActivity()).getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
+                    NavHostFragment.findNavController(this).navigate(R.id.action_fragment_commit_to_fragment_tables, new Bundle());
+                })).show();
+            }
+        });
+
         cashUp.setOnClickListener(v -> {
 
-            // Save in database as history
-            long currentTime = System.currentTimeMillis();
-            this.table.setEndTime(currentTime);
-            this.table.setUpdateUser(((MainActivity) requireActivity()).getUser().getId());
-            this.table.setUpdateTime(currentTime);
+            // Block UI and show progress bar
+            requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            requireView().findViewById(R.id.progressBar_order_done).setVisibility(View.VISIBLE);
 
-            ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_HISTORY).document(String.valueOf(currentTime)).set(this.table);
+            ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(((MainActivity) requireActivity()).getUser().getGroup() + "_" + this.table.getId()).get().addOnSuccessListener(documentSnapshot -> {
+                if (this.table.getUpdateTime() != Objects.requireNonNull(documentSnapshot.toObject(Table.class)).getUpdateTime()) {
 
-            // Update table status
-            this.table.setStartTime(null);
-            this.table.setPrice(null);
-            this.table.setStatus(Code.TableStatus.STAND_BY.value);
-            for (Dish dish : this.table.getDishList()) {
-                if (0 != dish.getNumbers()) {
-                    dish.setNumbers(0);
+                    // Release blocking UI and hide progress bar
+                    requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                    requireView().findViewById(R.id.progressBar_order_done).setVisibility(View.GONE);
+
+                    new MaterialAlertDialogBuilder(requireContext()).setTitle("Failed").setMessage("The status of this table had been changed, please try again after refreshing tables information in table list").setPositiveButton("ok", ((dialog, which) -> {
+                        ((MainActivity) requireActivity()).getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
+                        NavHostFragment.findNavController(this).navigate(R.id.action_fragment_commit_to_fragment_tables, new Bundle());
+                    })).show();
+                } else {
+
+                    // Save in database as history
+                    long currentTime = System.currentTimeMillis();
+                    this.table.setEndTime(currentTime);
+                    this.table.setUpdateUser(((MainActivity) requireActivity()).getUser().getId());
+                    this.table.setUpdateTime(currentTime);
+
+                    ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_HISTORY).document(String.valueOf(currentTime)).set(this.table);
+
+                    // Update table status
+                    this.table.setStartTime(null);
+                    this.table.setPrice(null);
+                    this.table.setStatus(Code.TableStatus.STAND_BY.value);
+                    for (Dish dish : this.table.getDishList()) {
+                        if (0 != dish.getNumbers()) {
+                            dish.setNumbers(0);
+                        }
+                    }
+                    ((MainActivity) requireActivity()).getTableMap().put(this.table.getId(), this.table);
+                    ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(table.getGroup() + "_" + table.getId()).set(this.table).addOnSuccessListener(aVoid -> {
+
+                        ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_OTHERS).document(table.getGroup()).update(Other.COLUMN_HISTORY_VERSION, currentTime, Other.COLUMN_TABLE_VERSION, currentTime).addOnSuccessListener(otherAVoid -> {
+
+                            // Release blocking UI and hide progress bar
+                            requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                            requireView().findViewById(R.id.progressBar_order_done).setVisibility(View.GONE);
+
+                            ((MainActivity) requireActivity()).getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
+                            NavHostFragment.findNavController(this).navigate(R.id.action_fragment_commit_to_fragment_tables, new Bundle());
+                        });
+                    });
                 }
-            }
-            ((MainActivity) requireActivity()).getTableMap().put(this.table.getId(), this.table);
-            ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(table.getGroup() + "_" + table.getId()).set(this.table);
-
-            ((MainActivity) requireActivity()).getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
-
-            NavHostFragment.findNavController(this).navigate(R.id.action_fragment_commit_to_fragment_tables, new Bundle());
+            });
         });
     }
 

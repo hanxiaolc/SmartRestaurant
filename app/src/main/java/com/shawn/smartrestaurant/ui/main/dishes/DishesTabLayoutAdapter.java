@@ -36,7 +36,17 @@ public class DishesTabLayoutAdapter extends FragmentStateAdapter {
     public Fragment createFragment(int position) {
         List<String> keyList = new ArrayList<>(dishCategoryMap.keySet());
         Collections.sort(keyList);
-        Collections.sort(Objects.requireNonNull(this.dishCategoryMap.get(keyList.get(position))), (o1, o2) -> o1.getDishCode().compareTo(o2.getDishCode()));
+        Collections.sort(Objects.requireNonNull(this.dishCategoryMap.get(keyList.get(position))), (o1, o2) -> {
+
+            if (null == o1.getDishCode()) {
+                return 1;
+            }
+            if (null == o2.getDishCode()) {
+                return -1;
+            }
+
+            return o1.getDishCode().compareTo(o2.getDishCode());
+        });
 
         return new DishesCategoryFragment(this.dishCategoryMap.get(keyList.get(position)));
         //return DishesCategoryFragment.newInstance(new Gson().toJson(this.dishMap.get(keyList.get(position))));

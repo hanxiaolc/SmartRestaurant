@@ -15,12 +15,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.gson.Gson;
 import com.shawn.smartrestaurant.Code;
 import com.shawn.smartrestaurant.R;
 import com.shawn.smartrestaurant.db.entity.Dish;
+import com.shawn.smartrestaurant.db.entity.Other;
 import com.shawn.smartrestaurant.db.entity.Table;
 import com.shawn.smartrestaurant.db.firebase.ShawnOrder;
 import com.shawn.smartrestaurant.ui.main.MainActivity;
@@ -173,6 +176,23 @@ public class FragmentDishes extends Fragment {
      *
      */
     @Override
+    public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
+
+        ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(((MainActivity) requireActivity()).getUser().getGroup() + "_" + this.table.getId()).get().addOnSuccessListener(documentSnapshot -> {
+
+            if (this.table.getUpdateTime() != Objects.requireNonNull(documentSnapshot.toObject(Table.class)).getUpdateTime()) {
+                new MaterialAlertDialogBuilder(requireContext()).setTitle("Failed").setMessage("The status of this table had been changed, please try again after refreshing tables information in table list").setPositiveButton("ok", ((dialog, which) -> {
+                    ((MainActivity) requireActivity()).getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
+                    NavHostFragment.findNavController(this).navigate(R.id.action_fragment_dishes_to_fragment_tables, new Bundle());
+                })).show();
+            }
+        });
+    }
+
+    /**
+     *
+     */
+    @Override
     public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
 
@@ -205,19 +225,32 @@ public class FragmentDishes extends Fragment {
                 return false;
             }
 
-            Table table = ((MainActivity) requireActivity()).getTableMap().get(this.table.getId());
-            long currentTime = System.currentTimeMillis();
-            Objects.requireNonNull(table).setUpdateUser(((MainActivity) requireActivity()).getUser().getId());
-            table.setUpdateTime(currentTime);
-            table.setStatus(Code.TableStatus.ON_SERVICE.value);
-            table.setDishList(dishList);
-            table.setStartTime(currentTime);
-            table.setPrice(totalPrice);
+            double finalTotalPrice = totalPrice;
+            ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(((MainActivity) requireActivity()).getUser().getGroup() + "_" + this.table.getId()).get().addOnSuccessListener(documentSnapshot -> {
 
-            Bundle bundle = new Bundle();
-            bundle.putString(FragmentOrderDone.ARG_TABLE, new Gson().toJson(table));
-            ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(table.getGroup() + "_" + table.getId()).update(Table.COLUMN_UPDATE_TIME, System.currentTimeMillis(), Table.COLUMN_UPDATE_USER, ((MainActivity) requireActivity()).getUser().getId(), Table.COLUMN_STATUS, Code.TableStatus.ON_SERVICE.value, Table.COLUMN_START_TIME, currentTime, Table.COLUMN_PRICE, totalPrice, Table.COLUMN_DISH_LIST, dishList);
-            NavHostFragment.findNavController(this).navigate(R.id.action_fragment_dishes_to_fragment_commit, bundle);
+                if (this.table.getUpdateTime() != Objects.requireNonNull(documentSnapshot.toObject(Table.class)).getUpdateTime()) {
+                    new MaterialAlertDialogBuilder(requireContext()).setTitle("Failed").setMessage("The status of this table had been changed, please try again after refreshing tables information in table list").setPositiveButton("ok", ((dialog, which) -> {
+
+                        ((MainActivity) requireActivity()).getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
+                        NavHostFragment.findNavController(this).navigate(R.id.action_fragment_dishes_to_fragment_tables, new Bundle());
+                    })).show();
+                } else {
+                    Table table = ((MainActivity) requireActivity()).getTableMap().get(this.table.getId());
+                    long currentTime = System.currentTimeMillis();
+                    Objects.requireNonNull(table).setUpdateUser(((MainActivity) requireActivity()).getUser().getId());
+                    table.setUpdateTime(currentTime);
+                    table.setStatus(Code.TableStatus.ON_SERVICE.value);
+                    table.setDishList(dishList);
+                    table.setStartTime(currentTime);
+                    table.setPrice(finalTotalPrice);
+
+                    Bundle bundle = new Bundle();
+                    bundle.putString(FragmentOrderDone.ARG_TABLE, new Gson().toJson(table));
+                    ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(table.getGroup() + "_" + table.getId()).update(Table.COLUMN_UPDATE_TIME, currentTime, Table.COLUMN_UPDATE_USER, ((MainActivity) requireActivity()).getUser().getId(), Table.COLUMN_STATUS, Code.TableStatus.ON_SERVICE.value, Table.COLUMN_START_TIME, currentTime, Table.COLUMN_PRICE, finalTotalPrice, Table.COLUMN_DISH_LIST, dishList);
+                    ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_OTHERS).document(table.getGroup()).update(Other.COLUMN_TABLE_VERSION, currentTime);
+                    NavHostFragment.findNavController(this).navigate(R.id.action_fragment_dishes_to_fragment_commit, bundle);
+                }
+            });
             return true;
         }
 
