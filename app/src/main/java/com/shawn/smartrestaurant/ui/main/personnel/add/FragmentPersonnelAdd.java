@@ -16,6 +16,7 @@ import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.gson.Gson;
 import com.shawn.smartrestaurant.R;
+import com.shawn.smartrestaurant.db.entity.Other;
 import com.shawn.smartrestaurant.db.entity.User;
 import com.shawn.smartrestaurant.db.firebase.ShawnOrder;
 import com.shawn.smartrestaurant.ui.main.MainActivity;
@@ -62,6 +63,8 @@ public class FragmentPersonnelAdd extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        ((MainActivity) requireActivity()).authenticate();
+
         if (getArguments() != null) {
             this.member = new Gson().fromJson(getArguments().getString(ARG_MEMBER), User.class);
         }
@@ -95,6 +98,7 @@ public class FragmentPersonnelAdd extends Fragment {
 
         group.setFocusable(false);
 
+        long currentTime = System.currentTimeMillis();
         if (null != this.member) {
             addNew.setVisibility(View.GONE);
             userId.setText(this.member.getId());
@@ -142,8 +146,11 @@ public class FragmentPersonnelAdd extends Fragment {
                     this.member.setPassword(Objects.requireNonNull(password.getText()).toString().trim());
                     this.member.setManager(isManager.isChecked());
                     this.member.setUpdateUser(((MainActivity) requireActivity()).getUser().getId());
-                    this.member.setUpdateTime(System.currentTimeMillis());
+                    this.member.setUpdateTime(currentTime);
                     ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_USERS).document(this.member.getId()).set(member).addOnSuccessListener(aVoid -> {
+
+                        ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_OTHERS).document(((MainActivity) requireActivity()).getUser().getGroup()).update(Other.COLUMN_MEMBER_VERSION, currentTime);
+
                         ((MainActivity) requireActivity()).setPersonnelChanged(true);
                         new MaterialAlertDialogBuilder(requireContext()).setTitle("SUCCESS").setMessage("Member information is updated.").setPositiveButton("OK", (dialog, which) -> {
                         }).show();
@@ -159,7 +166,6 @@ public class FragmentPersonnelAdd extends Fragment {
             addNew.setOnClickListener(v -> {
                 ((MainActivity) requireActivity()).setPersonnelChanged(true);
 
-                long currentTime = System.currentTimeMillis();
                 User member = new User();
                 member.setId(Objects.requireNonNull(userId.getText()).toString().trim());
                 member.setPassword(Objects.requireNonNull(password.getText()).toString().trim());

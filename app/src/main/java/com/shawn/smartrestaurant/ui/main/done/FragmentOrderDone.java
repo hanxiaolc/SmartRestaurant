@@ -72,6 +72,9 @@ public class FragmentOrderDone extends Fragment {
      */
     @Override
     public void onCreate(Bundle savedInstanceState) {
+
+        ((MainActivity) requireActivity()).authenticate();
+
         super.onCreate(savedInstanceState);
 
         if (getArguments() != null) {

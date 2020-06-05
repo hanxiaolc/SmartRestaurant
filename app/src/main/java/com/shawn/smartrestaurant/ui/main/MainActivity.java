@@ -137,9 +137,7 @@ public class MainActivity extends AppCompatActivity {
         NavigationView drawerNavigationView = findViewById(R.id.nav_view);
 
         // Set drawer header Logout button
-        drawerNavigationView.getHeaderView(0).findViewById(R.id.button_drawer_header_logout).setOnClickListener(v -> {
-            this.logout();
-        });
+        drawerNavigationView.getHeaderView(0).findViewById(R.id.button_drawer_header_logout).setOnClickListener(v -> this.logout());
 
         // TODO
         // this.drawerNavigationView.getMenu().getItem(3).setActionView(R.layout.action_reminder_dot);
@@ -237,9 +235,9 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
-    /**
-     *
-     */
+//    /**
+//     *
+//     */
 //    public void replaceFragment(Fragment newFragment) {
 ////        Bundle args = new Bundle();
 ////        newFragment.setArguments(args);
@@ -294,9 +292,9 @@ public class MainActivity extends AppCompatActivity {
         return this.actionBarDrawerToggle;
     }
 
-    /**
-     *
-     */
+//    /**
+//     *
+//     */
 //    public void clearFileDir() {
 //        if (null != Objects.requireNonNull(getFilesDir()).listFiles()) {
 //            for (File f : Objects.requireNonNull(getFilesDir().listFiles())) {
@@ -307,9 +305,9 @@ public class MainActivity extends AppCompatActivity {
 //        }
 //    }
 
-    /**
-     *
-     */
+//    /**
+//     *
+//     */
 //    public void refreshMenuImages() {
 //        this.menuImagesMap.clear();
 ////            this.clearFileDir();
@@ -341,19 +339,19 @@ public class MainActivity extends AppCompatActivity {
      */
     public void authenticate() {
         this.db.collection(ShawnOrder.COLLECTION_USERS).document(this.user.getId()).get().addOnSuccessListener(documentSnapshot -> {
+            debug(Code.LOG_DB_DEBUG_TAG, "Get user in authenticate method of MainActivity.");
+
             User latest = documentSnapshot.toObject(User.class);
             if (!Objects.equals(latest, this.user)) {
                 this.logout();
             }
-        }).addOnFailureListener(e -> {
-            this.logout();
-        });
+        }).addOnFailureListener(e -> this.logout());
     }
 
     /**
      *
      */
-    public void dataUpdate(/** ProgressBar processBar*/TextView listenerDishes, TextView listenerTables, TextView listenerUsers, TextView listenerHistory) {
+    public void dataUpdate(TextView listenerDishes, TextView listenerTables, TextView listenerUsers, TextView listenerHistory) {
         // Block UI and show progress bar
 //        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
 //        processBar.setVisibility(View.VISIBLE);
@@ -363,8 +361,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         this.db.collection(ShawnOrder.COLLECTION_OTHERS).document(this.user.getGroup()).get().addOnSuccessListener(documentSnapshot -> {
-            Other latestOther = documentSnapshot.toObject(Other.class);
+            debug(Code.LOG_DB_DEBUG_TAG, "Get other in dataUpdate method of MainActivity.");
 
+            Other latestOther = documentSnapshot.toObject(Other.class);
             if (this.other.getMenuVersion() != Objects.requireNonNull(latestOther).getMenuVersion()) {
                 this.updateDishes(listenerDishes, latestOther);
             } else {
@@ -410,6 +409,8 @@ public class MainActivity extends AppCompatActivity {
 
         this.dishList = new ArrayList<>();
         this.db.collection(ShawnOrder.COLLECTION_DISHES).whereEqualTo(Dish.COLUMN_GROUP, this.user.getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+            debug(Code.LOG_DB_DEBUG_TAG, "Get dishes in updateDishes method of MainActivity.");
+
             for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
                 this.dishList.add(ds.toObject(Dish.class));
             }
@@ -441,6 +442,7 @@ public class MainActivity extends AppCompatActivity {
 
         this.tableMap = new HashMap<>();
         this.db.collection(ShawnOrder.COLLECTION_TABLES).whereEqualTo(Table.COLUMN_GROUP, this.user.getGroup()).orderBy(Table.COLUMN_ID).get().addOnSuccessListener(qdsTables -> {
+            debug(Code.LOG_DB_DEBUG_TAG, "Get tables in updateTables method of MainActivity.");
 
             for (DocumentSnapshot ds : qdsTables.getDocuments()) {
                 Table table = ds.toObject(Table.class);
@@ -464,6 +466,8 @@ public class MainActivity extends AppCompatActivity {
     public void updateUsers(TextView listener, Other latestOther) {
         this.memberList = new ArrayList<>();
         this.db.collection(ShawnOrder.COLLECTION_USERS).whereEqualTo(User.COLUMN_GROUP, this.user.getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+            debug(Code.LOG_DB_DEBUG_TAG, "Get user in updateUsers method of MainActivity.");
+
             for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
                 this.memberList.add(ds.toObject(User.class));
             }
@@ -482,6 +486,8 @@ public class MainActivity extends AppCompatActivity {
     public void updateHistory(TextView listener, Other latestOther) {
         this.historyTableList = new ArrayList<>();
         this.db.collection(ShawnOrder.COLLECTION_HISTORY).whereEqualTo(Table.COLUMN_GROUP, this.user.getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+            debug(Code.LOG_DB_DEBUG_TAG, "Get history in updateHistory method of MainActivity.");
+
             for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
                 this.historyTableList.add(ds.toObject(Table.class));
             }
@@ -494,15 +500,25 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+//    /**
+//     *
+//     */
+//    public void updateOthers() {
+//        this.db.collection(ShawnOrder.COLLECTION_OTHERS).document(this.user.getGroup()).get().addOnSuccessListener(documentSnapshot -> {
+//            debug(Code.LOG_DB_DEBUG_TAG, "Get other in updateOthers method.");
+//
+//            this.other = documentSnapshot.toObject(Other.class);
+//        });
+//    }
+
     /**
      *
      */
-    public void updateOthers() {
-        this.db.collection(ShawnOrder.COLLECTION_OTHERS).document(this.user.getGroup()).get().addOnSuccessListener(documentSnapshot -> {
-            this.other = documentSnapshot.toObject(Other.class);
-        });
+    public static void debug(String tag, String message) {
+        if (Code.IS_DEBUG_MODE) {
+            Log.d(tag, message);
+        }
     }
-
 //    /**
 //     *
 //     */

@@ -63,6 +63,8 @@ public class FragmentHistoryTables extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        ((MainActivity) requireActivity()).authenticate();
+
         setHasOptionsMenu(true);
 
 //        if (getArguments() != null) {

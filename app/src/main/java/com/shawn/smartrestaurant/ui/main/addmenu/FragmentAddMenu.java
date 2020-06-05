@@ -162,6 +162,7 @@ public class FragmentAddMenu extends Fragment {
             // Save the new dish
             // TODO Add failure handling
             ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).whereEqualTo(Table.COLUMN_GROUP, ((MainActivity) requireActivity()).getUser().getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+                MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get tables when new dish number is created in FragmentAddMenu.AddMenuTextWatcher.");
 
                 boolean onService = false;
 
@@ -186,8 +187,10 @@ public class FragmentAddMenu extends Fragment {
                 // Update menu version to others table.
                 long currentTime = System.currentTimeMillis();
                 ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_DISHES).document(this.newDash.getId()).set(this.newDash).addOnSuccessListener(aVoid -> {
+                    MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Set new dish in FragmentAddMenu.AddMenuTextWatcher.");
 
                     ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_DISHES).whereEqualTo(Dish.COLUMN_GROUP, ((MainActivity) requireActivity()).getUser().getGroup()).orderBy(Dish.COLUMN_ID).get().addOnSuccessListener(qdsDishes -> {
+                        MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get the latest dish list in FragmentAddMenu.AddMenuTextWatcher.");
 
                         List<Dish> latestDishList = new ArrayList<>();
                         for (DocumentSnapshot ds : qdsDishes.getDocuments()) {
@@ -199,6 +202,7 @@ public class FragmentAddMenu extends Fragment {
 
                         for (Map.Entry<String, Table> entry : ((MainActivity) requireActivity()).getTableMap().entrySet()) {
                             ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(((MainActivity) requireActivity()).getUser().getGroup() + "_" + entry.getValue().getId()).update(Table.COLUMN_DISH_LIST, latestDishList, Table.COLUMN_UPDATE_USER, ((MainActivity) requireActivity()).getUser().getId(), Table.COLUMN_UPDATE_TIME, currentTime);
+                            MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get tables when new dish number is created in FragmentAddMenu.AddMenuTextWatcher. table id=" + entry.getKey());
 
                             entry.getValue().setDishList(latestDishList);
                             entry.getValue().setUpdateUser(((MainActivity) requireActivity()).getUser().getId());
@@ -208,6 +212,7 @@ public class FragmentAddMenu extends Fragment {
 
                         // TODO Add failure handling
                         ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_OTHERS).document(((MainActivity) requireActivity()).getUser().getGroup()).update(Other.COLUMN_MENU_VERSION, currentTime, Other.COLUMN_TABLE_VERSION, currentTime).addOnSuccessListener(aVoidUpdateOther -> {
+                            MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Update other in FragmentAddMenu.AddMenuTextWatcher.");
 
                             // Release blocking UI and hide progress bar
                             requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
@@ -255,6 +260,8 @@ public class FragmentAddMenu extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        ((MainActivity) requireActivity()).authenticate();
+
         if (getArguments() != null) {
             this.dish = new Gson().fromJson(getArguments().getString(FragmentAddMenu.ARG_DISH), Dish.class);
 //            this.imageView = getArguments().getByteArray(ARG_IMAGE_VIEW);
@@ -278,7 +285,7 @@ public class FragmentAddMenu extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        ((AppBarLayout) ((MainActivity) requireActivity()).findViewById(R.id.appBarLayout_main)).setExpanded(true);
+        ((AppBarLayout) requireActivity().findViewById(R.id.appBarLayout_main)).setExpanded(true);
 
         View view = inflater.inflate(R.layout.framelayout_nav_addmenu, container, false);
 
@@ -333,6 +340,7 @@ public class FragmentAddMenu extends Fragment {
 
             // TODO Add failure handling
             ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_DISHES).whereEqualTo(Dish.COLUMN_DISH_NAME, dish.getDishName()).whereEqualTo(Dish.COLUMN_GROUP, dish.getGroup()).get().addOnSuccessListener(dsByName -> {
+                MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get dishes when addNew button is clicked for checking duplicate in FragmentAddMenu.");
 
                 if (!Objects.requireNonNull(dsByName).isEmpty() && ((this.dish.getId().isEmpty() || !(this.dish.getId().equals(Objects.requireNonNull(dsByName.getDocuments().get(0).toObject(Dish.class)).getId()))))) {
                     // Release blocking UI and hide progress bar
@@ -350,6 +358,8 @@ public class FragmentAddMenu extends Fragment {
                 } else {
                     // TODO Add failure handling
                     ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_DISHES).orderBy(Dish.COLUMN_ID, Query.Direction.DESCENDING).limit(1).get().addOnSuccessListener(dsById -> {
+                        MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get dishes when addNew button is clicked for getting the biggest dish number in FragmentAddMenu.");
+
                         this.dish.setId(String.valueOf(Integer.parseInt(Objects.requireNonNull(dsById.getDocuments().get(0).toObject(Dish.class)).getId()) + 1));
                         listener.addTextChangedListener(new AddMenuTextWatcher(this.dish, requireView()));
                         listener.setText(Code.READY);
@@ -364,10 +374,12 @@ public class FragmentAddMenu extends Fragment {
             requireView().findViewById(R.id.progressBar_add_menu).setVisibility(View.VISIBLE);
 
             ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_DISHES).document(this.dish.getId()).delete().addOnSuccessListener(aVoid -> {
+                MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get dishes when delete button is clicked in FragmentAddMenu.");
 
                 // Update menu version to others table.
                 // TODO Add failure handling
                 ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_OTHERS).document(((MainActivity) requireActivity()).getUser().getGroup()).update(Other.COLUMN_MENU_VERSION, currentTime, Other.COLUMN_TABLE_VERSION, currentTime).addOnSuccessListener(aVoidUpdateOther -> {
+                    MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Update other when delete button is clicked in FragmentAddMenu.");
 
                     // Release blocking UI and hide progress bar
                     requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);

@@ -118,6 +118,8 @@ public class FragmentTables extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        ((MainActivity) requireActivity()).authenticate();
+
         setHasOptionsMenu(true);
 
         // initial current fragment in activity

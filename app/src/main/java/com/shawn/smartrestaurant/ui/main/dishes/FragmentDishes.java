@@ -125,6 +125,9 @@ public class FragmentDishes extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        ((MainActivity) requireActivity()).authenticate();
+
         if (getArguments() != null) {
             this.table = new Gson().fromJson(getArguments().getString(ARG_TABLE), Table.class);
         }

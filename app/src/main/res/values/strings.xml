@@ -26,7 +26,7 @@
     <string name="drawer_home">HOME</string>
     <string name="drawer_menu">MENU</string>
     <string name="drawer_profile">PERSONNEL</string>
-    <string name="drawer_setting">TABLE SETTING</string>
+    <string name="drawer_setting">TABLE NUMBER</string>
     <string name="drawer_history">HISTORY</string>
     <string name="drawer_profile_image">PROFILE IMAGE</string>
     <string name="drawer_other">OTHER</string>

@@ -15,6 +15,12 @@ public class Code {
     public static final String READY = "ready";
 
     //
+    public static final String LOG_DB_DEBUG_TAG = "HANXIAOLI(DB): ";
+
+    //
+    public static final boolean IS_DEBUG_MODE = false;
+
+    //
     private static final long ONE_MEGABYTE = 1024 * 1024 * 10;
 
     //

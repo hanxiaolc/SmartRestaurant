@@ -62,6 +62,8 @@ public class FragmentHistoryOrderDone extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        ((MainActivity) requireActivity()).authenticate();
+
         if (getArguments() != null) {
             this.historyTable = new Gson().fromJson(getArguments().getString(ARG_HISTORY_TABLE), Table.class);
         }

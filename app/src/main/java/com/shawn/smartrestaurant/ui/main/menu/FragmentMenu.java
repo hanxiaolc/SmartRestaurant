@@ -123,6 +123,8 @@ public class FragmentMenu extends Fragment {
 //            mParam2 = getArguments().getString(ARG_PARAM2);
 //        }
 
+        ((MainActivity) requireActivity()).authenticate();
+
         // Remember to set has option menu true
         setHasOptionsMenu(true);
 

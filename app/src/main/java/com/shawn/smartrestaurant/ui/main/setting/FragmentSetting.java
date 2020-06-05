@@ -13,18 +13,23 @@ import android.widget.AutoCompleteTextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.shawn.smartrestaurant.Code;
 import com.shawn.smartrestaurant.R;
+import com.shawn.smartrestaurant.db.entity.Other;
 import com.shawn.smartrestaurant.db.entity.Table;
 import com.shawn.smartrestaurant.db.firebase.ShawnOrder;
 import com.shawn.smartrestaurant.ui.main.MainActivity;
-import com.shawn.smartrestaurant.ui.main.addmenu.FragmentAddMenu;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ *
+ */
 public class FragmentSetting extends Fragment {
 
     //
@@ -33,15 +38,15 @@ public class FragmentSetting extends Fragment {
     //
     private ArrayAdapter<Integer> adapter;
 
-    /**
-     *
-     */
-    private static FragmentAddMenu newInstance(byte[] imageView, String dishCode, String dishName, String category, String price, boolean hasImage, String action) {
-        FragmentAddMenu fragment = new FragmentAddMenu();
-        Bundle args = new Bundle();
-        fragment.setArguments(args);
-        return fragment;
-    }
+//    /**
+//     *
+//     */
+//    private static FragmentAddMenu newInstance(byte[] imageView, String dishCode, String dishName, String category, String price, boolean hasImage, String action) {
+//        FragmentAddMenu fragment = new FragmentAddMenu();
+//        Bundle args = new Bundle();
+//        fragment.setArguments(args);
+//        return fragment;
+//    }
 
     /**
      *
@@ -49,7 +54,9 @@ public class FragmentSetting extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
+
+        ((MainActivity) requireActivity()).authenticate();
+//        if (getArguments() != null) {
 //            this.imageView = getArguments().getByteArray(ARG_IMAGE_VIEW);
 //            this.dishCode = getArguments().getString(ARG_DISH_CODE);
 //            this.dishName = getArguments().getString(ARG_DISH_NAME);
@@ -57,7 +64,7 @@ public class FragmentSetting extends Fragment {
 //            this.price = getArguments().getDouble(ARG_PRICE);
 //            this.hasImage = getArguments().getBoolean(ARG_HAS_IMAGE);
 //            this.action = getArguments().getString(ARG_ACTION);
-        }
+//        }
     }
 
     /**
@@ -104,7 +111,6 @@ public class FragmentSetting extends Fragment {
 
         this.numberOfTables.setAdapter(this.adapter);
 
-
         // TODO Add onFailureListener
         ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).whereEqualTo(Table.COLUMN_GROUP, ((MainActivity) requireActivity()).getUser().getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
             this.numberOfTables.setText(String.valueOf(queryDocumentSnapshots.getDocuments().size()), false);
@@ -129,20 +135,53 @@ public class FragmentSetting extends Fragment {
              */
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
 
-                // Block UI and show progress bar
-                requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-                requireView().findViewById(R.id.progressBar_setting).setVisibility(View.VISIBLE);
+            /**
+             *
+             */
+            @Override
+            public void afterTextChanged(Editable s) {
 
+//                if (this.before.equals(s)) {
+//                    // Release blocking UI and hide progress bar
+//                    requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+//                    requireView().findViewById(R.id.progressBar_setting).setVisibility(View.GONE);
+//                    return;
+//                }
+
+                AtomicBoolean isOnService = new AtomicBoolean(false);
                 List<Table> tables = new ArrayList<>();
-                if (this.before != s) {
+                if (!this.before.toString().isEmpty() && !this.before.equals(s)) {
+
+                    // Block UI and show progress bar
+                    requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                    requireView().findViewById(R.id.progressBar_setting).setVisibility(View.VISIBLE);
+
                     // TODO Add onFailureListener
                     ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).whereEqualTo(Table.COLUMN_GROUP, (((MainActivity) requireActivity()).getUser().getGroup())).get().addOnSuccessListener(queryDocumentSnapshots -> {
                         for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
                             Table tempTable = ds.toObject(Table.class);
+                            if (Code.TableStatus.ON_SERVICE.value.equals(Objects.requireNonNull(tempTable).getStatus())) {
+                                isOnService.set(true);
+                            }
+                            tables.add(tempTable);
+                        }
 
+                        if (isOnService.get()) {
+                            // Release blocking UI and hide progress bar
+                            requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                            requireView().findViewById(R.id.progressBar_setting).setVisibility(View.GONE);
+
+                            new MaterialAlertDialogBuilder(requireContext()).setTitle("Failed").setMessage("Menu information could not be fixed if even single table in ON SERVICE condition.").setPositiveButton("OK", ((dialog, which) -> {
+                            })).show();
+
+                            return;
+                        }
+
+                        for (Table table : tables) {
                             // TODO Add onFailureListener
-                            ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(Objects.requireNonNull(tempTable).getGroup() + "_" + tempTable.getId()).delete();
+                            ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(Objects.requireNonNull(table).getGroup() + "_" + table.getId()).delete();
                         }
 
                         for (int i = 0; i < Integer.parseInt(String.valueOf(s)); i++) {
@@ -165,19 +204,18 @@ public class FragmentSetting extends Fragment {
                             ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(table.getGroup() + "_" + table.getId()).set(table);
                         }
 
-                        // Release blocking UI and hide progress bar
-                        requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-                        requireView().findViewById(R.id.progressBar_setting).setVisibility(View.GONE);
-                        // TODO
+                        // TODO Add onFailureListener
+                        ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_OTHERS).document(((MainActivity) requireActivity()).getUser().getGroup()).update(Other.COLUMN_TABLE_VERSION, System.currentTimeMillis()).addOnSuccessListener(aVoid -> {
+
+                            // Release blocking UI and hide progress bar
+                            requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                            requireView().findViewById(R.id.progressBar_setting).setVisibility(View.GONE);
+
+                            new MaterialAlertDialogBuilder(requireContext()).setTitle("Successful").setMessage("Menu information have been updated.").setPositiveButton("OK", (dialog, which) -> {
+                            }).show();
+                        });
                     });
                 }
-            }
-
-            /**
-             *
-             */
-            @Override
-            public void afterTextChanged(Editable s) {
             }
         });
     }

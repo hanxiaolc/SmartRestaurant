@@ -9,6 +9,8 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.shawn.smartrestaurant.Code;
@@ -34,14 +37,56 @@ import java.util.Objects;
  *
  */
 public class FragmentPersonnelMembers extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    /**
+     *
+     */
+    public class ReadyListenerTextWatcher implements TextWatcher {
+
+        //
+        private PersonnelRecyclerViewAdapter adapter;
+
+        /**
+         *
+         */
+        ReadyListenerTextWatcher(PersonnelRecyclerViewAdapter adapter) {
+            this.adapter = adapter;
+        }
+
+        /**
+         *
+         */
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+        }
+
+        /**
+         *
+         */
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+        }
+
+        /**
+         *
+         */
+        @Override
+        public void afterTextChanged(Editable s) {
+
+            if (!Code.READY.equals(s.toString())) {
+                return;
+            }
+
+            this.adapter.setMemberList((((MainActivity) requireActivity()).getMemberList()));
+            this.adapter.notifyDataSetChanged();
+
+            // Release blocking UI and hide progress bar
+            requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            requireView().findViewById(R.id.progressBar_personnel_members).setVisibility(View.GONE);
+
+            s.clear();
+        }
+    }
 
 
     /**
@@ -75,6 +120,8 @@ public class FragmentPersonnelMembers extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        ((MainActivity) requireActivity()).authenticate();
+
         setHasOptionsMenu(true);
 
 //        if (getArguments() != null) {
@@ -99,6 +146,7 @@ public class FragmentPersonnelMembers extends Fragment {
 
         PersonnelRecyclerViewAdapter personnelRecyclerViewAdapter = new PersonnelRecyclerViewAdapter(new ArrayList<>());
         recyclerView.setAdapter(personnelRecyclerViewAdapter);
+
         return fragmentPersonnelMembers;
     }
 
@@ -108,34 +156,17 @@ public class FragmentPersonnelMembers extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
 
+        // Block UI and show progress bar
+        requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        requireView().findViewById(R.id.progressBar_personnel_members).setVisibility(View.VISIBLE);
+
         RecyclerView recyclerView = requireView().findViewById(R.id.recyclerView_personnel_members);
         PersonnelRecyclerViewAdapter adapter = (PersonnelRecyclerViewAdapter) recyclerView.getAdapter();
 
-        if (((MainActivity) requireActivity()).isPersonnelChanged() || null == ((MainActivity) requireActivity()).getMemberList() || ((MainActivity) requireActivity()).getMemberList().isEmpty()) {
-            ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_USERS).whereEqualTo(User.COLUMN_GROUP, ((MainActivity) requireActivity()).getUser().getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+        TextView listenerUsers = new TextView(requireContext());
+        listenerUsers.addTextChangedListener(new ReadyListenerTextWatcher(adapter));
 
-                Objects.requireNonNull(adapter).getMemberList().clear();
-                ((MainActivity) requireActivity()).setMemberList(new ArrayList<>());
-                adapter.notifyDataSetChanged();
-
-                int i = 0;
-                for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
-                    User member = ds.toObject(User.class);
-                    Objects.requireNonNull(adapter).getMemberList().add(member);
-                    adapter.notifyItemInserted(i);
-                    i++;
-
-                    ((MainActivity) requireActivity()).getMemberList().add(member);
-                }
-            });
-        } else {
-            int i = 0;
-            for (User member : ((MainActivity) requireActivity()).getMemberList()) {
-                Objects.requireNonNull(adapter).getMemberList().add(member);
-                adapter.notifyItemInserted(i);
-                i++;
-            }
-        }
+        ((MainActivity) requireActivity()).dataUpdate(null, null, listenerUsers, null);
     }
 
     /**
