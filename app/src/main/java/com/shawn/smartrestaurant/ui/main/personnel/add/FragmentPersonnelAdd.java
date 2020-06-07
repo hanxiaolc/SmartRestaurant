@@ -15,6 +15,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.gson.Gson;
+import com.shawn.smartrestaurant.Code;
 import com.shawn.smartrestaurant.R;
 import com.shawn.smartrestaurant.db.entity.Other;
 import com.shawn.smartrestaurant.db.entity.User;
@@ -130,6 +131,8 @@ public class FragmentPersonnelAdd extends Fragment {
 
                 delete.setOnClickListener(v -> {
                     ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_USERS).document(this.member.getId()).delete().addOnSuccessListener(aVoid -> {
+                        MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Delete user in FragmentPersonnelAdd where Delete button is clicked.");
+
                         ((MainActivity) requireActivity()).setPersonnelChanged(true);
                         Navigation.findNavController(v)
                                 .navigate(R.id.action_framelayout_nav_personnel_add_to_framelayout_nav_personnel_members, new Bundle());
@@ -148,8 +151,10 @@ public class FragmentPersonnelAdd extends Fragment {
                     this.member.setUpdateUser(((MainActivity) requireActivity()).getUser().getId());
                     this.member.setUpdateTime(currentTime);
                     ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_USERS).document(this.member.getId()).set(member).addOnSuccessListener(aVoid -> {
+                        MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Set user in FragmentPersonnelAdd when Update button is clicked.");
 
                         ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_OTHERS).document(((MainActivity) requireActivity()).getUser().getGroup()).update(Other.COLUMN_MEMBER_VERSION, currentTime);
+                        MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Update other in FragmentPersonnelAdd when Update button is clicked.");
 
                         ((MainActivity) requireActivity()).setPersonnelChanged(true);
                         new MaterialAlertDialogBuilder(requireContext()).setTitle("SUCCESS").setMessage("Member information is updated.").setPositiveButton("OK", (dialog, which) -> {
@@ -183,6 +188,8 @@ public class FragmentPersonnelAdd extends Fragment {
                 }
 
                 ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_USERS).document(member.getId()).set(member).addOnSuccessListener(aVoid -> {
+                    MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Set user in FragmentPersonnelAdd when Add New button is clicked.");
+
                     ((MainActivity) requireActivity()).setPersonnelChanged(true);
                     Navigation.findNavController(v)
                             .navigate(R.id.action_framelayout_nav_personnel_add_to_framelayout_nav_personnel_members, new Bundle());

@@ -182,6 +182,7 @@ public class FragmentDishes extends Fragment {
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
 
         ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(((MainActivity) requireActivity()).getUser().getGroup() + "_" + this.table.getId()).get().addOnSuccessListener(documentSnapshot -> {
+            MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get tables in FragmentDishes.onViewCreated to check if table status is newest.");
 
             if (this.table.getUpdateTime() != Objects.requireNonNull(documentSnapshot.toObject(Table.class)).getUpdateTime()) {
                 new MaterialAlertDialogBuilder(requireContext()).setTitle("Failed").setMessage("The status of this table had been changed, please try again after refreshing tables information in table list").setPositiveButton("ok", ((dialog, which) -> {
@@ -230,6 +231,7 @@ public class FragmentDishes extends Fragment {
 
             double finalTotalPrice = totalPrice;
             ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(((MainActivity) requireActivity()).getUser().getGroup() + "_" + this.table.getId()).get().addOnSuccessListener(documentSnapshot -> {
+                MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get tables in FragmentDishes to check if the status of some tables were changed when place an order.");
 
                 if (this.table.getUpdateTime() != Objects.requireNonNull(documentSnapshot.toObject(Table.class)).getUpdateTime()) {
                     new MaterialAlertDialogBuilder(requireContext()).setTitle("Failed").setMessage("The status of this table had been changed, please try again after refreshing tables information in table list").setPositiveButton("ok", ((dialog, which) -> {
@@ -250,7 +252,11 @@ public class FragmentDishes extends Fragment {
                     Bundle bundle = new Bundle();
                     bundle.putString(FragmentOrderDone.ARG_TABLE, new Gson().toJson(table));
                     ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(table.getGroup() + "_" + table.getId()).update(Table.COLUMN_UPDATE_TIME, currentTime, Table.COLUMN_UPDATE_USER, ((MainActivity) requireActivity()).getUser().getId(), Table.COLUMN_STATUS, Code.TableStatus.ON_SERVICE.value, Table.COLUMN_START_TIME, currentTime, Table.COLUMN_PRICE, finalTotalPrice, Table.COLUMN_DISH_LIST, dishList);
+                    MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Update tables in FragmentDishes after placed an order.");
+
                     ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_OTHERS).document(table.getGroup()).update(Other.COLUMN_TABLE_VERSION, currentTime);
+                    MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Update other in FragmentDishes after placed an order.");
+
                     NavHostFragment.findNavController(this).navigate(R.id.action_fragment_dishes_to_fragment_commit, bundle);
                 }
             });

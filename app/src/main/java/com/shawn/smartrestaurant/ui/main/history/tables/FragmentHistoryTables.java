@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Query;
+import com.shawn.smartrestaurant.Code;
 import com.shawn.smartrestaurant.R;
 import com.shawn.smartrestaurant.db.entity.Table;
 import com.shawn.smartrestaurant.db.firebase.ShawnOrder;
@@ -107,6 +108,8 @@ public class FragmentHistoryTables extends Fragment {
             ((MainActivity) requireActivity()).setHistoryTableList(new ArrayList<>());
             // TODO Add onFailureListener
             ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_HISTORY).whereEqualTo(Table.COLUMN_GROUP, ((MainActivity) requireActivity()).getUser().getGroup()).orderBy(Table.COLUMN_END_TIME, Query.Direction.DESCENDING).get().addOnSuccessListener(queryDocumentSnapshots -> {
+                MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get history in FragmentHistoryTables.onViewCreated.");
+
                 int i = 0;
                 for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
                     Table historyTable = ds.toObject(Table.class);
@@ -150,6 +153,8 @@ public class FragmentHistoryTables extends Fragment {
             ((MainActivity) requireActivity()).setHistoryTableList(new ArrayList<>());
             // TODO Add onFailureListener
             ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_HISTORY).whereEqualTo(Table.COLUMN_GROUP, ((MainActivity) requireActivity()).getUser().getGroup()).orderBy(Table.COLUMN_END_TIME, Query.Direction.DESCENDING).get().addOnSuccessListener(queryDocumentSnapshots -> {
+                MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get history in FragmentHistoryTables when Refresh button is clicked.");
+
                 int i = 0;
                 Objects.requireNonNull(adapter).getHistoryTableList().clear();
                 adapter.notifyDataSetChanged();

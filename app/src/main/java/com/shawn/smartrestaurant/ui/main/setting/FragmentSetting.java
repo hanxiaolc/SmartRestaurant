@@ -113,6 +113,8 @@ public class FragmentSetting extends Fragment {
 
         // TODO Add onFailureListener
         ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).whereEqualTo(Table.COLUMN_GROUP, ((MainActivity) requireActivity()).getUser().getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+            MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get tables in FragmentSetting to set the default table number.");
+
             this.numberOfTables.setText(String.valueOf(queryDocumentSnapshots.getDocuments().size()), false);
 
         });
@@ -160,6 +162,8 @@ public class FragmentSetting extends Fragment {
 
                     // TODO Add onFailureListener
                     ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).whereEqualTo(Table.COLUMN_GROUP, (((MainActivity) requireActivity()).getUser().getGroup())).get().addOnSuccessListener(queryDocumentSnapshots -> {
+                        MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get tables in FragmentSetting when table numbers were changed.");
+
                         for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
                             Table tempTable = ds.toObject(Table.class);
                             if (Code.TableStatus.ON_SERVICE.value.equals(Objects.requireNonNull(tempTable).getStatus())) {
@@ -182,6 +186,8 @@ public class FragmentSetting extends Fragment {
                         for (Table table : tables) {
                             // TODO Add onFailureListener
                             ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(Objects.requireNonNull(table).getGroup() + "_" + table.getId()).delete();
+                            MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Delete tables in FragmentSetting when table numbers were changed.");
+
                         }
 
                         for (int i = 0; i < Integer.parseInt(String.valueOf(s)); i++) {
@@ -202,10 +208,12 @@ public class FragmentSetting extends Fragment {
 
                             // TODO Add onFailureListener
                             ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(table.getGroup() + "_" + table.getId()).set(table);
+                            MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Set tables in FragmentSetting when table numbers were changed.");
                         }
 
                         // TODO Add onFailureListener
                         ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_OTHERS).document(((MainActivity) requireActivity()).getUser().getGroup()).update(Other.COLUMN_TABLE_VERSION, System.currentTimeMillis()).addOnSuccessListener(aVoid -> {
+                            MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Update other in FragmentSetting when table numbers were changed.");
 
                             // Release blocking UI and hide progress bar
                             requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);

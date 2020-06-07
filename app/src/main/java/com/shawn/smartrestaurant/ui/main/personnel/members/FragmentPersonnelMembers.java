@@ -199,6 +199,8 @@ public class FragmentPersonnelMembers extends Fragment {
 
             // TODO Add onFailureListener
             ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_USERS).whereEqualTo(Table.COLUMN_GROUP, ((MainActivity) requireActivity()).getUser().getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+                MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get user in FragmentPersonnelMembers when Refresh button is clicked.");
+
                 RecyclerView recyclerView = requireView().findViewById(R.id.recyclerView_personnel_members);
                 PersonnelRecyclerViewAdapter adapter = (PersonnelRecyclerViewAdapter) recyclerView.getAdapter();
                 Objects.requireNonNull(adapter).getMemberList().clear();

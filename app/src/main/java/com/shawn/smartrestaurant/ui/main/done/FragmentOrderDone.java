@@ -120,6 +120,7 @@ public class FragmentOrderDone extends Fragment {
         totalPriceTextView.setText(" $" + String.format("%.2f", this.table.getPrice()));
 
         ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(((MainActivity) requireActivity()).getUser().getGroup() + "_" + this.table.getId()).get().addOnSuccessListener(documentSnapshot -> {
+            MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get tables in FragmentOrderDone to check if some tables were changed.");
 
             if (this.table.getUpdateTime() != Objects.requireNonNull(documentSnapshot.toObject(Table.class)).getUpdateTime()) {
                 new MaterialAlertDialogBuilder(requireContext()).setTitle("Failed").setMessage("The status of this table had been changed, please try again after refreshing tables information in table list").setPositiveButton("ok", ((dialog, which) -> {
@@ -136,6 +137,8 @@ public class FragmentOrderDone extends Fragment {
             requireView().findViewById(R.id.progressBar_order_done).setVisibility(View.VISIBLE);
 
             ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(((MainActivity) requireActivity()).getUser().getGroup() + "_" + this.table.getId()).get().addOnSuccessListener(documentSnapshot -> {
+                MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get tables in FragmentOrderDone when Cash Up button is clicked to check if some table had been changed.");
+
                 if (this.table.getUpdateTime() != Objects.requireNonNull(documentSnapshot.toObject(Table.class)).getUpdateTime()) {
 
                     // Release blocking UI and hide progress bar
@@ -155,6 +158,7 @@ public class FragmentOrderDone extends Fragment {
                     this.table.setUpdateTime(currentTime);
 
                     ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_HISTORY).document(String.valueOf(currentTime)).set(this.table);
+                    MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Add history in FragmentOrderDone when Cash Up button is clicked.");
 
                     // Update table status
                     this.table.setStartTime(null);
@@ -167,8 +171,10 @@ public class FragmentOrderDone extends Fragment {
                     }
                     ((MainActivity) requireActivity()).getTableMap().put(this.table.getId(), this.table);
                     ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(table.getGroup() + "_" + table.getId()).set(this.table).addOnSuccessListener(aVoid -> {
+                        MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get tables in FragmentOrderDone when Cash Up button is clicked to set table to be newest.");
 
                         ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_OTHERS).document(table.getGroup()).update(Other.COLUMN_HISTORY_VERSION, currentTime, Other.COLUMN_TABLE_VERSION, currentTime).addOnSuccessListener(otherAVoid -> {
+                            MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Update other in FragmentOrderDone when Cash Up button is clicked.");
 
                             // Release blocking UI and hide progress bar
                             requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
