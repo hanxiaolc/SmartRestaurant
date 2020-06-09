@@ -342,7 +342,7 @@ public class MainActivity extends AppCompatActivity {
             debug(Code.LOG_DB_DEBUG_TAG, "Get user in authenticate method of MainActivity.");
 
             User latest = documentSnapshot.toObject(User.class);
-            if (!Objects.equals(latest, this.user)) {
+            if (!latest.getId().equals(this.user.getId()) || latest.getUpdateTime() != this.user.getUpdateTime()) {
                 this.logout();
             }
         }).addOnFailureListener(e -> this.logout());

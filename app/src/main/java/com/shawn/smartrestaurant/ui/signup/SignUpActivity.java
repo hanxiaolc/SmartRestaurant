@@ -26,6 +26,7 @@ import com.shawn.smartrestaurant.db.entity.Table;
 import com.shawn.smartrestaurant.db.entity.User;
 import com.shawn.smartrestaurant.db.firebase.ShawnOrder;
 import com.shawn.smartrestaurant.ui.login.LoginActivity;
+import com.shawn.smartrestaurant.ui.main.MainActivity;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -102,6 +103,7 @@ public class SignUpActivity extends AppCompatActivity {
             user.setUpdateTime(currentTime);
 
             this.db.collection(ShawnOrder.COLLECTION_USERS).document(user.getId()).get().addOnSuccessListener(documentSnapshot -> {
+                MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get user to check if it has exited in SignUpActivity.");
 
                 // Release blocking UI and hide progress bar
                 getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
@@ -120,7 +122,9 @@ public class SignUpActivity extends AppCompatActivity {
                 other.setTableVersion(currentTime);
                 other.setMemberVersion(currentTime);
                 // TODO Add OnFailureListener
-                this.db.collection(ShawnOrder.COLLECTION_OTHERS).document(user.getGroup()).set(other);
+                this.db.collection(ShawnOrder.COLLECTION_OTHERS).document(user.getGroup()).set(other).addOnSuccessListener(aVoid -> {
+                    MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Set other in SignUpActivity.");
+                });
 
                 Dish dish = new Dish();
                 dish.setId(s.toString());
@@ -136,7 +140,9 @@ public class SignUpActivity extends AppCompatActivity {
                 dish.setCreateTime(currentTime);
 
                 // TODO Add OnFailureListener
-                this.db.collection(ShawnOrder.COLLECTION_DISHES).document(dish.getId()).set(dish);
+                this.db.collection(ShawnOrder.COLLECTION_DISHES).document(dish.getId()).set(dish).addOnSuccessListener(aVoid -> {
+                    MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Set dish in SignUpActivity.");
+                });
 
                 Table table = new Table();
                 table.setId("01");
@@ -149,11 +155,15 @@ public class SignUpActivity extends AppCompatActivity {
                 table.setCreateTime(currentTime);
 
                 // TODO Add OnFailureListener
-                this.db.collection(ShawnOrder.COLLECTION_TABLES).document(table.getGroup() + "_" + table.getId()).set(table);
+                this.db.collection(ShawnOrder.COLLECTION_TABLES).document(table.getGroup() + "_" + table.getId()).set(table).addOnSuccessListener(aVoid -> {
+                    MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Set table in LoginActivity.");
+                });
 
                 // Register account.
                 // TODO Add OnFailureListener
                 this.db.collection(ShawnOrder.COLLECTION_USERS).document(user.getId()).set(user).addOnSuccessListener(aVoid -> new MaterialAlertDialogBuilder(this.context).setTitle("Successful").setMessage("Now you can login with your account.").setPositiveButton("OK", (dialog, which) -> {
+                    MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Set user in SignUpActivity.");
+
                     Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
@@ -222,6 +232,8 @@ public class SignUpActivity extends AppCompatActivity {
             findViewById(R.id.progressBar_sign_up).setVisibility(View.VISIBLE);
 
             this.db.collection(ShawnOrder.COLLECTION_DISHES).orderBy(Dish.COLUMN_ID, Query.Direction.DESCENDING).limit(1).get().addOnSuccessListener(queryDocumentSnapshots -> {
+                MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get the dish which has the biggest Id in SignUpActivity when Sign Up button is clicked.");
+
                 for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
                     dishId.setText(String.valueOf(Integer.parseInt(Objects.requireNonNull(ds.toObject(Dish.class)).getId()) + 1));
                 }
@@ -238,6 +250,8 @@ public class SignUpActivity extends AppCompatActivity {
         findViewById(R.id.progressBar_sign_up).setVisibility(View.VISIBLE);
 
         this.db.collection(ShawnOrder.COLLECTION_OTHERS).get().addOnSuccessListener(queryDocumentSnapshots -> {
+            MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get other for taking all the group codes in SignUpActivity.");
+
             Random random = new Random();
             String randomGroupCode;
             List<String> groupList = new ArrayList<>();

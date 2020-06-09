@@ -19,18 +19,12 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.TextView;
 
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.shawn.smartrestaurant.Code;
 import com.shawn.smartrestaurant.R;
-import com.shawn.smartrestaurant.db.entity.Dish;
-import com.shawn.smartrestaurant.db.entity.Table;
-import com.shawn.smartrestaurant.db.firebase.ShawnOrder;
 import com.shawn.smartrestaurant.ui.main.MainActivity;
-import com.shawn.smartrestaurant.ui.main.menu.MenuRecyclerViewAdapter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Objects;
 
 
 /**
@@ -147,6 +141,9 @@ public class FragmentTables extends Fragment {
         TablesRecyclerViewAdapter tablesRecyclerViewAdapter = new TablesRecyclerViewAdapter(new ArrayList<>());
         recyclerView.setAdapter(tablesRecyclerViewAdapter);
 
+        if (null == ((MainActivity) requireActivity()).getTableMap()) {
+            ((MainActivity) requireActivity()).setTableMap(new HashMap<>());
+        }
         ((TextView) fragmentTables.findViewById(R.id.textView_tables_listener)).addTextChangedListener(new DishesReadyListenerTextWatcher((TablesRecyclerViewAdapter) recyclerView.getAdapter()));
 
         return fragmentTables;

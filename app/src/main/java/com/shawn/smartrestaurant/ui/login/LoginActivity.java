@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.shawn.smartrestaurant.Code;
 import com.shawn.smartrestaurant.R;
 import com.shawn.smartrestaurant.db.AppDatabase;
 import com.shawn.smartrestaurant.db.entity.User;
@@ -67,6 +68,8 @@ public class LoginActivity extends AppCompatActivity {
 
             // TODO Add onFailureListener
             db.collection(ShawnOrder.COLLECTION_USERS).document(user.getId()).get().addOnSuccessListener(documentSnapshot -> {
+                MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get user in LoginActivity.");
+
                 User result = documentSnapshot.toObject(User.class);
 
                 if (null == result) {
