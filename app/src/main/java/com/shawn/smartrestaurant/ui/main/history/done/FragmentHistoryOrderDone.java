@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.gson.Gson;
 import com.shawn.smartrestaurant.R;
 import com.shawn.smartrestaurant.db.entity.Dish;
@@ -79,6 +80,9 @@ public class FragmentHistoryOrderDone extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        ((AppBarLayout) requireActivity().findViewById(R.id.appBarLayout_main)).setExpanded(true);
+
         return inflater.inflate(R.layout.framelayout_nav_history_order_done, container, false);
     }
 

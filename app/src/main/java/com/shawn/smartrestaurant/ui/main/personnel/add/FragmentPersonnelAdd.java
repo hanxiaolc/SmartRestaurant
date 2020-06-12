@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.switchmaterial.SwitchMaterial;
 import com.google.android.material.textfield.TextInputEditText;
@@ -81,6 +82,9 @@ public class FragmentPersonnelAdd extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        ((AppBarLayout) requireActivity().findViewById(R.id.appBarLayout_main)).setExpanded(true);
+
         return inflater.inflate(R.layout.framelayout_nav_personnel_add, container, false);
     }
 
@@ -133,7 +137,11 @@ public class FragmentPersonnelAdd extends Fragment {
                     ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_USERS).document(this.member.getId()).delete().addOnSuccessListener(aVoid -> {
                         MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Delete user in FragmentPersonnelAdd where Delete button is clicked.");
 
-                        ((MainActivity) requireActivity()).setPersonnelChanged(true);
+                        ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_OTHERS).document(((MainActivity) requireActivity()).getUser().getGroup()).update(Other.COLUMN_MEMBER_VERSION, currentTime);
+                        MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Update other in FragmentPersonnelAdd when Delete button is clicked.");
+
+//                        ((MainActivity) requireActivity()).setPersonnelChanged(true);
+                        ((MainActivity) requireActivity()).getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
                         Navigation.findNavController(v)
                                 .navigate(R.id.action_framelayout_nav_personnel_add_to_framelayout_nav_personnel_members, new Bundle());
                     });
@@ -156,8 +164,12 @@ public class FragmentPersonnelAdd extends Fragment {
                         ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_OTHERS).document(((MainActivity) requireActivity()).getUser().getGroup()).update(Other.COLUMN_MEMBER_VERSION, currentTime);
                         MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Update other in FragmentPersonnelAdd when Update button is clicked.");
 
-                        ((MainActivity) requireActivity()).setPersonnelChanged(true);
+//                        ((MainActivity) requireActivity()).setPersonnelChanged(true);
                         new MaterialAlertDialogBuilder(requireContext()).setTitle("SUCCESS").setMessage("Member information is updated.").setPositiveButton("OK", (dialog, which) -> {
+
+                            ((MainActivity) requireActivity()).getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
+                            Navigation.findNavController(v)
+                                    .navigate(R.id.action_framelayout_nav_personnel_add_to_framelayout_nav_personnel_members, new Bundle());
                         }).show();
                     });
                 });
@@ -169,7 +181,7 @@ public class FragmentPersonnelAdd extends Fragment {
             isManager.setChecked(false);
 
             addNew.setOnClickListener(v -> {
-                ((MainActivity) requireActivity()).setPersonnelChanged(true);
+//                ((MainActivity) requireActivity()).setPersonnelChanged(true);
 
                 User member = new User();
                 member.setId(Objects.requireNonNull(userId.getText()).toString().trim());
@@ -187,10 +199,21 @@ public class FragmentPersonnelAdd extends Fragment {
                     return;
                 }
 
+                // Validate User ID
+                if (!member.validateUserId()) {
+                    new MaterialAlertDialogBuilder(requireContext()).setTitle("Failed").setMessage("You need to give a 4-16 alphabets or numbers for User ID.").setPositiveButton("OK", (dialog, which) -> {
+                    }).show();
+                    return;
+                }
+
                 ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_USERS).document(member.getId()).set(member).addOnSuccessListener(aVoid -> {
                     MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Set user in FragmentPersonnelAdd when Add New button is clicked.");
 
-                    ((MainActivity) requireActivity()).setPersonnelChanged(true);
+                    ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_OTHERS).document(((MainActivity) requireActivity()).getUser().getGroup()).update(Other.COLUMN_MEMBER_VERSION, currentTime);
+                    MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Update other in FragmentPersonnelAdd when Add New button is clicked.");
+
+//                    ((MainActivity) requireActivity()).setPersonnelChanged(true);
+                    ((MainActivity) requireActivity()).getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
                     Navigation.findNavController(v)
                             .navigate(R.id.action_framelayout_nav_personnel_add_to_framelayout_nav_personnel_members, new Bundle());
                 });

@@ -18,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
 
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.gson.Gson;
 import com.shawn.smartrestaurant.Code;
@@ -94,6 +95,8 @@ public class FragmentOrderDone extends Fragment {
                              Bundle savedInstanceState) {
         setHasOptionsMenu(true);
 
+        ((AppBarLayout) requireActivity().findViewById(R.id.appBarLayout_main)).setExpanded(true);
+
         return inflater.inflate(R.layout.framelayout_nav_order_done, container, false);
     }
 
@@ -106,6 +109,7 @@ public class FragmentOrderDone extends Fragment {
         TableLayout tableLayout = view.findViewById(R.id.tableLayout_order_done);
         TextView totalPriceTextView = view.findViewById(R.id.textView_order_done_total_price);
         Button cashUp = view.findViewById(R.id.button_order_done_cash_up);
+        Button cancel = view.findViewById(R.id.button_order_done_cancel);
 
         tableLayout.removeAllViews();
         tableLayout.setStretchAllColumns(true);
@@ -137,10 +141,9 @@ public class FragmentOrderDone extends Fragment {
             requireView().findViewById(R.id.progressBar_order_done).setVisibility(View.VISIBLE);
 
             ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(((MainActivity) requireActivity()).getUser().getGroup() + "_" + this.table.getId()).get().addOnSuccessListener(documentSnapshot -> {
-                MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get tables in FragmentOrderDone when Cash Up button is clicked to check if some table had been changed.");
+                MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get tables in FragmentOrderDone when Cash Up button is clicked to check if the table had been changed.");
 
                 if (this.table.getUpdateTime() != Objects.requireNonNull(documentSnapshot.toObject(Table.class)).getUpdateTime()) {
-
                     // Release blocking UI and hide progress bar
                     requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                     requireView().findViewById(R.id.progressBar_order_done).setVisibility(View.GONE);
@@ -150,7 +153,6 @@ public class FragmentOrderDone extends Fragment {
                         NavHostFragment.findNavController(this).navigate(R.id.action_fragment_commit_to_fragment_tables, new Bundle());
                     })).show();
                 } else {
-
                     // Save in database as history
                     long currentTime = System.currentTimeMillis();
                     this.table.setEndTime(currentTime);
@@ -175,6 +177,57 @@ public class FragmentOrderDone extends Fragment {
 
                         ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_OTHERS).document(table.getGroup()).update(Other.COLUMN_HISTORY_VERSION, currentTime, Other.COLUMN_TABLE_VERSION, currentTime).addOnSuccessListener(otherAVoid -> {
                             MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Update other in FragmentOrderDone when Cash Up button is clicked.");
+
+                            // Release blocking UI and hide progress bar
+                            requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                            requireView().findViewById(R.id.progressBar_order_done).setVisibility(View.GONE);
+
+                            ((MainActivity) requireActivity()).getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
+                            NavHostFragment.findNavController(this).navigate(R.id.action_fragment_commit_to_fragment_tables, new Bundle());
+                        });
+                    });
+                }
+            });
+        });
+
+        cancel.setOnClickListener(v -> {
+            // Block UI and show progress bar
+            requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            requireView().findViewById(R.id.progressBar_order_done).setVisibility(View.VISIBLE);
+
+            ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(((MainActivity) requireActivity()).getUser().getGroup() + "_" + this.table.getId()).get().addOnSuccessListener(documentSnapshot -> {
+                MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get tables in FragmentOrderDone when Cancel button is clicked to check if the table had been changed.");
+
+                if (this.table.getUpdateTime() != Objects.requireNonNull(documentSnapshot.toObject(Table.class)).getUpdateTime()) {
+                    // Release blocking UI and hide progress bar
+                    requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                    requireView().findViewById(R.id.progressBar_order_done).setVisibility(View.GONE);
+
+                    new MaterialAlertDialogBuilder(requireContext()).setTitle("Failed").setMessage("The status of this table had been changed, please try again after refreshing tables information in table list").setPositiveButton("ok", ((dialog, which) -> {
+                        ((MainActivity) requireActivity()).getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
+                        NavHostFragment.findNavController(this).navigate(R.id.action_fragment_commit_to_fragment_tables, new Bundle());
+                    })).show();
+                } else {
+                    // Save in database as history
+                    long currentTime = System.currentTimeMillis();
+
+                    // Update table status
+                    this.table.setStartTime(null);
+                    this.table.setPrice(null);
+                    this.table.setStatus(Code.TableStatus.STAND_BY.value);
+                    this.table.setUpdateUser(((MainActivity) requireActivity()).getUser().getId());
+                    this.table.setUpdateTime(currentTime);
+                    for (Dish dish : this.table.getDishList()) {
+                        if (0 != dish.getNumbers()) {
+                            dish.setNumbers(0);
+                        }
+                    }
+                    ((MainActivity) requireActivity()).getTableMap().put(this.table.getId(), this.table);
+                    ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(table.getGroup() + "_" + table.getId()).set(this.table).addOnSuccessListener(aVoid -> {
+                        MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get tables in FragmentOrderDone when Cancel button is clicked to set table to be newest.");
+
+                        ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_OTHERS).document(table.getGroup()).update(Other.COLUMN_TABLE_VERSION, currentTime).addOnSuccessListener(otherAVoid -> {
+                            MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Update other in FragmentOrderDone when Cancel button is clicked.");
 
                             // Release blocking UI and hide progress bar
                             requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);

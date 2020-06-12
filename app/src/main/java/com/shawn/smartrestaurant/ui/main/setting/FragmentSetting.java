@@ -13,6 +13,7 @@ import android.widget.AutoCompleteTextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.shawn.smartrestaurant.Code;
@@ -73,6 +74,9 @@ public class FragmentSetting extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        ((AppBarLayout) requireActivity().findViewById(R.id.appBarLayout_main)).setExpanded(true);
+
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_drawer_setting, container, false);
     }
@@ -87,6 +91,11 @@ public class FragmentSetting extends Fragment {
         }
 
         setUpNumberOfTables();
+
+        if (!((MainActivity) requireActivity()).getUser().isManager()) {
+            this.numberOfTables.setFocusable(false);
+            this.numberOfTables.setAdapter(null);
+        }
     }
 
     /**

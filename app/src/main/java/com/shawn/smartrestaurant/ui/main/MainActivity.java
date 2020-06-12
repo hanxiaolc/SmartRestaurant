@@ -105,8 +105,8 @@ public class MainActivity extends AppCompatActivity {
     //
     private List<Table> historyTableList;
 
-    //
-    private boolean personnelChanged;
+//    //
+//    private boolean personnelChanged;
 
     //
     private boolean menuChanged;
@@ -727,19 +727,19 @@ public class MainActivity extends AppCompatActivity {
         this.historyTableList = historyTableList;
     }
 
-    /**
-     *
-     */
-    public boolean isPersonnelChanged() {
-        return personnelChanged;
-    }
-
-    /**
-     *
-     */
-    public void setPersonnelChanged(boolean personnelChanged) {
-        this.personnelChanged = personnelChanged;
-    }
+//    /**
+//     *
+//     */
+//    public boolean isPersonnelChanged() {
+//        return personnelChanged;
+//    }
+//
+//    /**
+//     *
+//     */
+//    public void setPersonnelChanged(boolean personnelChanged) {
+//        this.personnelChanged = personnelChanged;
+//    }
 
     /**
      *

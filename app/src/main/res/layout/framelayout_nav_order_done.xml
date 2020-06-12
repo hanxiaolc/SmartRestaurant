@@ -53,15 +53,28 @@
                     android:textSize="20sp" />
             </LinearLayout>
 
-            <Button
-                android:id="@+id/button_order_done_cash_up"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
                 android:layout_marginTop="32dp"
                 android:layout_marginBottom="120dp"
-                android:drawableStart="@drawable/ic_attach_money_black_24dp"
-                android:text="@string/button_cash_up" />
+                android:gravity="center_horizontal">
+
+                <Button
+                    android:id="@+id/button_order_done_cancel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="32dp"
+                    android:drawableStart="@drawable/ic_baseline_cancel_24"
+                    android:text="@string/button_cash_up" />
+
+                <Button
+                    android:id="@+id/button_order_done_cash_up"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableStart="@drawable/ic_attach_money_black_24dp"
+                    android:text="@string/button_cash_up" />
+            </LinearLayout>
         </LinearLayout>
 
         <ProgressBar

@@ -18,7 +18,6 @@ import android.widget.Toast;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.gson.Gson;
 import com.shawn.smartrestaurant.Code;
 import com.shawn.smartrestaurant.R;
@@ -35,8 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import io.grpc.SynchronizationContext;
 
 
 /**

@@ -302,6 +302,16 @@ public class FragmentAddMenu extends Fragment {
 
         if (null != getArguments()) {
             addNew.setText(R.string.button_update);
+
+            if (!((MainActivity) requireActivity()).getUser().isManager()) {
+                addNew.setVisibility(View.GONE);
+                delete.setVisibility(View.GONE);
+                dishCode.setFocusable(false);
+                dishName.setFocusable(false);
+                category.setFocusable(false);
+                category.setAdapter(null);
+                price.setFocusable(false);
+            }
         } else {
             delete.setVisibility(View.GONE);
         }
@@ -373,22 +383,69 @@ public class FragmentAddMenu extends Fragment {
             requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             requireView().findViewById(R.id.progressBar_add_menu).setVisibility(View.VISIBLE);
 
-            ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_DISHES).document(this.dish.getId()).delete().addOnSuccessListener(aVoid -> {
-                MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get dishes when delete button is clicked in FragmentAddMenu.");
+            // TODO Add failure handling
+            ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).whereEqualTo(Table.COLUMN_GROUP, ((MainActivity) requireActivity()).getUser().getGroup()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+                MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get tables when DELETE button is clicked in FragmentAddMenu.");
 
-                // Update menu version to others table.
-                // TODO Add failure handling
-                ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_OTHERS).document(((MainActivity) requireActivity()).getUser().getGroup()).update(Other.COLUMN_MENU_VERSION, currentTime, Other.COLUMN_TABLE_VERSION, currentTime).addOnSuccessListener(aVoidUpdateOther -> {
-                    MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Update other when delete button is clicked in FragmentAddMenu.");
+                boolean onService = false;
 
+                for (DocumentSnapshot ds : queryDocumentSnapshots.getDocuments()) {
+                    Table table = ds.toObject(Table.class);
+
+                    if (null != Objects.requireNonNull(table).getStartTime() || null != table.getPrice()) {
+                        onService = true;
+                    }
+                }
+
+                if (onService) {
                     // Release blocking UI and hide progress bar
                     requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                     requireView().findViewById(R.id.progressBar_add_menu).setVisibility(View.GONE);
 
-                    new MaterialAlertDialogBuilder(requireContext()).setTitle("Successful").setMessage("Menu information have been updated.").setPositiveButton("OK", (dialog, which) -> {
-                        ((MainActivity) requireActivity()).getMenuNavHostFragment().getNavController().navigate(R.id.action_framelayout_nav_addmenu_to_framelayout_nav_menu, null);
-                        ((MainActivity) requireActivity()).getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
+                    new MaterialAlertDialogBuilder(requireContext()).setTitle("Failed").setMessage("Menu information could not be fixed if even single table in ON SERVICE condition.").setPositiveButton("OK", (dialog, which) -> {
                     }).show();
+                    return;
+                }
+
+                ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_DISHES).document(this.dish.getId()).delete().addOnSuccessListener(aVoid -> {
+                    MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get dishes when delete button is clicked in FragmentAddMenu.");
+
+
+                    ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_DISHES).whereEqualTo(Dish.COLUMN_GROUP, ((MainActivity) requireActivity()).getUser().getGroup()).orderBy(Dish.COLUMN_ID).get().addOnSuccessListener(qdsDishes -> {
+                        MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Update tables when delete button is clicked in FragmentAddMenu.");
+
+                        List<Dish> latestDishList = new ArrayList<>();
+                        for (DocumentSnapshot ds : qdsDishes.getDocuments()) {
+                            latestDishList.add(ds.toObject(Dish.class));
+                        }
+
+                        ((MainActivity) requireActivity()).setDishList(latestDishList);
+                        ((MainActivity) requireActivity()).getOther().setMenuVersion(currentTime);
+
+                        for (Map.Entry<String, Table> entry : ((MainActivity) requireActivity()).getTableMap().entrySet()) {
+                            ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_TABLES).document(((MainActivity) requireActivity()).getUser().getGroup() + "_" + entry.getValue().getId()).update(Table.COLUMN_DISH_LIST, latestDishList, Table.COLUMN_UPDATE_USER, ((MainActivity) requireActivity()).getUser().getId(), Table.COLUMN_UPDATE_TIME, currentTime);
+                            MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Get tables when new dish number is created in FragmentAddMenu.AddMenuTextWatcher. table id=" + entry.getKey());
+
+                            entry.getValue().setDishList(latestDishList);
+                            entry.getValue().setUpdateUser(((MainActivity) requireActivity()).getUser().getId());
+                            entry.getValue().setUpdateTime(currentTime);
+                        }
+                    });
+
+                    // Update menu version to others table.
+                    // TODO Add failure handling
+                    ((MainActivity) requireActivity()).getDb().collection(ShawnOrder.COLLECTION_OTHERS).document(((MainActivity) requireActivity()).getUser().getGroup()).update(Other.COLUMN_MENU_VERSION, currentTime, Other.COLUMN_TABLE_VERSION, currentTime).addOnSuccessListener(aVoidUpdateOther -> {
+                        MainActivity.debug(Code.LOG_DB_DEBUG_TAG, "Update other when delete button is clicked in FragmentAddMenu.");
+
+                        // Release blocking UI and hide progress bar
+                        requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                        requireView().findViewById(R.id.progressBar_add_menu).setVisibility(View.GONE);
+
+                        new MaterialAlertDialogBuilder(requireContext()).setTitle("Successful").setMessage("Menu information have been updated.").setPositiveButton("OK", (dialog, which) -> {
+                            ((MainActivity) requireActivity()).getMenuNavHostFragment().getNavController().navigate(R.id.action_framelayout_nav_addmenu_to_framelayout_nav_menu, null);
+                            ((MainActivity) requireActivity()).getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
+                        }).show();
+                    });
                 });
             });
         });
@@ -429,6 +486,10 @@ public class FragmentAddMenu extends Fragment {
                 requireContext(),
                 R.layout.item_list_menu_category,
                 new ArrayList<>(categorySet)));
+
+        if (!((MainActivity) requireActivity()).getUser().isManager()) {
+            category.setAdapter(null);
+        }
 
         // Set button behavior
 //        addToMenu.setOnClickListener(v -> {

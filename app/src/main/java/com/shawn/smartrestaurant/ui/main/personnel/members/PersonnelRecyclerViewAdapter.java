@@ -13,12 +13,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.gson.Gson;
 import com.shawn.smartrestaurant.R;
-import com.shawn.smartrestaurant.db.entity.Table;
 import com.shawn.smartrestaurant.db.entity.User;
-import com.shawn.smartrestaurant.ui.main.history.done.FragmentHistoryOrderDone;
 import com.shawn.smartrestaurant.ui.main.personnel.add.FragmentPersonnelAdd;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 /**
