@@ -137,4 +137,29 @@ public class Code {
             this.value = value;
         }
     }
+
+    /**
+     *
+     */
+    public enum ActionBarTitle {
+
+        /**
+         *
+         */
+        DEFAULT(0, "SMART ORDER"), TABLE(1, "TABLE");
+
+        //
+        public int id;
+
+        //
+        public String value;
+
+        /**
+         *
+         */
+        ActionBarTitle(int id, String value) {
+            this.id = id;
+            this.value = value;
+        }
+    }
 }

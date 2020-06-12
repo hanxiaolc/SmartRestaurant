@@ -34,6 +34,7 @@
     <string name="button_refresh">REFRESH</string>
     <string name="button_home">HOME</string>
     <string name="button_cash_up">CASH UP</string>
+    <string name="button_cancel">CANCEL</string>
     <string name="button_dishes_down">DONE</string>
     <string name="drawer_header_website">shawn.com</string>
     <string name="nav_app_bar_open_drawer_description">Open navigation drawer</string>

@@ -25,6 +25,7 @@ import com.shawn.smartrestaurant.ui.main.MainActivity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 
 
 /**
@@ -130,6 +131,9 @@ public class FragmentTables extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        //
+        Objects.requireNonNull(((MainActivity) requireActivity()).getSupportActionBar()).setTitle(Code.ActionBarTitle.DEFAULT.value);
 
         View fragmentTables = inflater.inflate(R.layout.framelayout_nav_tables, container, false);
         RecyclerView recyclerView = fragmentTables.findViewById(R.id.tables_recyclerView);

@@ -1,8 +1,12 @@
 package com.shawn.smartrestaurant;
 
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.shawn.smartrestaurant.db.AppDatabase;
+import com.shawn.smartrestaurant.db.entity.Dish;
+import com.shawn.smartrestaurant.db.entity.Table;
 import com.shawn.smartrestaurant.db.entity.User;
+import com.shawn.smartrestaurant.db.firebase.ShawnOrder;
 
 import junit.framework.TestResult;
 
@@ -12,6 +16,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -42,9 +47,6 @@ public class ExampleUnitTest {
     @Ignore("Test Method")
     @Test
     public void test02() {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-//        db.collection("restaurent01").get();
-        //assertTrue(matcher.matches());
     }
 
     @Test

@@ -93,6 +93,10 @@ public class FragmentOrderDone extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+        //
+        Objects.requireNonNull(((MainActivity) requireActivity()).getSupportActionBar()).setTitle(Code.ActionBarTitle.TABLE.value + " " + this.table.getId());
+
         setHasOptionsMenu(true);
 
         ((AppBarLayout) requireActivity().findViewById(R.id.appBarLayout_main)).setExpanded(true);

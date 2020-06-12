@@ -141,6 +141,9 @@ public class FragmentDishes extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        //
+        Objects.requireNonNull(((MainActivity) requireActivity()).getSupportActionBar()).setTitle(Code.ActionBarTitle.TABLE.value + " " + this.table.getId());
+
         Map<String, List<Dish>> dishCategoryMap = new HashMap<>();
         for (Dish dish : this.table.getDishList()) {
             if (null == dishCategoryMap.get(dish.getCategory())) {
